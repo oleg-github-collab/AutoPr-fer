@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>AutoPrüfer Pro - KI Auto-Analyse</title>
+    
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/logo-192.png">
+    
+    <!-- Preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Styles -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+    <!-- App Container -->
+    <div id="app" class="app-container">
+        
+        <!-- Step 1: Upload Screen -->
+        <div id="uploadScreen" class="screen active">
+            <header class="app-header">
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <i class="fas fa-car-side"></i>
+                        AutoPrüfer Pro
+                    </h1>
+                    <div class="header-subtitle">KI-Analyse in 30 Sekunden</div>
+                </div>
+            </header>
+            
+            <main class="app-main">
+                <!-- Upload Options -->
+                <div class="upload-container">
+                    <!-- Photo Upload Card -->
+                    <div class="upload-card" id="photoUploadCard">
+                        <input type="file" id="photoInput" accept="image/*" multiple hidden>
+                        <div class="upload-icon">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <h3>Fotos hochladen</h3>
+                        <p>Machen Sie Fotos oder wählen Sie aus der Galerie</p>
+                        <button class="btn-outline" onclick="document.getElementById('photoInput').click()">
+                            <i class="fas fa-plus"></i> Fotos auswählen
+                        </button>
+                    </div>
+                    
+                    <!-- URL Input Card -->
+                    <div class="upload-card">
+                        <div class="upload-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <h3>Link einfügen</h3>
+                        <p>Mobile.de, AutoScout24, eBay Kleinanzeigen</p>
+                        <input type="url" id="urlInput" placeholder="https://..." class="url-input">
+                    </div>
+                </div>
+                
+                <!-- Selected Files Preview -->
+                <div id="filesPreview" class="files-preview hidden">
+                    <h4>Ausgewählte Dateien</h4>
+                    <div id="filesList" class="files-list"></div>
+                </div>
+                
+                <!-- Bottom Action Bar -->
+                <div class="bottom-bar">
+                    <button id="analyzeBtn" class="btn-primary btn-large" disabled>
+                        <i class="fas fa-search"></i>
+                        <span>Analyse starten</span>
+                    </button>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Step 2: Plan Selection Screen -->
+        <div id="planScreen" class="screen">
+            <header class="app-header with-back">
+                <button class="back-btn" onclick="showScreen('uploadScreen')">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>Analyseumfang wählen</h2>
+            </header>
+            
+            <main class="app-main">
+                <div class="plans-container">
+                    <!-- Basic Plan -->
+                    <div class="plan-card" onclick="selectPlan('basic')">
+                        <div class="plan-header">
+                            <h3>Basis-Check</h3>
+                            <div class="plan-price">4,99€</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i> Schnelle KI-Analyse</li>
+                            <li><i class="fas fa-check"></i> Risikobewertung</li>
+                            <li><i class="fas fa-check"></i> Preisverhandlungstipps</li>
+                            <li><i class="fas fa-check"></i> Kaufempfehlung</li>
+                        </ul>
+                        <button class="btn-outline btn-select">
+                            Basis wählen
+                        </button>
+                    </div>
+                    
+                    <!-- Premium Plan -->
+                    <div class="plan-card premium">
+                        <div class="plan-badge">Beliebteste Wahl</div>
+                        <div class="plan-header">
+                            <h3>Premium-Analyse</h3>
+                            <div class="plan-price">16,99€</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i> Alles aus Basis-Check</li>
+                            <li><i class="fas fa-check"></i> 40+ Analyseparameter</li>
+                            <li><i class="fas fa-check"></i> <strong>Vergleich mit 3 Alternativen</strong></li>
+                            <li><i class="fas fa-check"></i> Interaktive Grafiken</li>
+                            <li><i class="fas fa-check"></i> Unterhaltskosten-Prognose</li>
+                            <li><i class="fas fa-check"></i> Chat-Beratung (10 Fragen)</li>
+                        </ul>
+                        <button class="btn-primary btn-select" onclick="selectPlan('premium')">
+                            Premium wählen
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Step 3: Analysis Screen -->
+        <div id="analysisScreen" class="screen">
+            <header class="app-header">
+                <h2>Analyse läuft...</h2>
+            </header>
+            
+            <main class="app-main centered">
+                <div class="analysis-progress">
+                    <div class="progress-spinner">
+                        <div class="spinner"></div>
+                    </div>
+                    <div class="progress-text">
+                        <h3 id="progressTitle">Fotos werden analysiert...</h3>
+                        <p id="progressSubtitle">Dies kann bis zu 60 Sekunden dauern</p>
+                    </div>
+                    <div class="progress-steps">
+                        <div class="step active" id="step1">
+                            <i class="fas fa-image"></i>
+                            <span>Bilder prüfen</span>
+                        </div>
+                        <div class="step" id="step2">
+                            <i class="fas fa-brain"></i>
+                            <span>KI-Analyse</span>
+                        </div>
+                        <div class="step" id="step3">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Bericht erstellen</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Step 4: Results Screen -->
+        <div id="resultsScreen" class="screen">
+            <header class="app-header with-actions">
+                <button class="back-btn" onclick="resetApp()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h2>Analyseergebnis</h2>
+                <button class="share-btn" onclick="shareResults()">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </header>
+            
+            <main class="app-main results-main">
+                <div id="resultsContent">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </main>
+        </div>
+        
+    </div>
+    
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.6.2/countUp.umd.min.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

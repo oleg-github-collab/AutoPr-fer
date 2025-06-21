@@ -1,0 +1,55 @@
+{
+    "name": "AutoPrüfer Pro - KI Auto-Analyse",
+    "short_name": "AutoPrüfer",
+    "description": "KI-gestützte Fahrzeuganalyse in 30 Sekunden",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "theme_color": "#1e40af",
+    "background_color": "#0f172a",
+    "icons": [
+      {
+        "src": "/logo-192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "any maskable"
+      },
+      {
+        "src": "/logo-512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any maskable"
+      }
+    ],
+    "categories": ["utilities", "productivity"],
+    "lang": "de-DE",
+    "dir": "ltr",
+    "prefer_related_applications": false,
+    "shortcuts": [
+      {
+        "name": "Neue Analyse",
+        "short_name": "Analyse",
+        "description": "Neue Fahrzeuganalyse starten",
+        "url": "/",
+        "icons": [
+          {
+            "src": "/logo-192.png",
+            "sizes": "192x192"
+          }
+        ]
+      }
+    ],
+    "share_target": {
+      "action": "/",
+      "method": "POST",
+      "enctype": "multipart/form-data",
+      "params": {
+        "files": [
+          {
+            "name": "photos",
+            "accept": ["image/*"]
+          }
+        ]
+      }
+    }
+  }
