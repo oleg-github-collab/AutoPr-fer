@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e40af">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <title>AutoPrüfer Pro - KI Auto-Analyse</title>
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* app.css - AutoPrüfer Pro Mobile-First Design */
+
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1e40af;
+            --secondary: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #0f172a;
+            --gray-900: #111827;
+            --gray-800: #1f2937;
+            --gray-700: #374151;
+            --gray-600: #4b5563;
+            --gray-500: #6b7280;
+            --gray-400: #9ca3af;
+            --gray-300: #d1d5db;
+            --gray-200: #e5e7eb;
+            --gray-100: #f3f4f6;
+            --white: #ffffff;
+            
+            --header-height: 60px;
+            --bottom-bar-height: 80px;
+            --safe-area-inset-bottom: env(safe-area-inset-bottom, 0);
+            --border-radius: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--gray-900);
+            color: var(--white);
+            line-height: 1.5;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* App Container */
+        .app-container {
+            min-height: 100vh;
+            position: relative;
+            background: linear-gradient(180deg, var(--dark) 0%, var(--gray-900) 100%);
+        }
+
+        /* Screens */
+        .screen {
+            display: none;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        /* App Header */
+        .app-header {
+            position: sticky;
+            top: 0;
+            height: var(--header-height);
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .app-header.with-back {
+            justify-content: flex-start;
+            gap: 16px;
+        }
+
+        .app-header.with-actions {
+            justify-content: space-between;
+        }
+
+        .header-content {
+            text-align: center;
+        }
+
+        .app-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .app-title i {
+            color: var(--primary);
+        }
+
+        .header-subtitle {
+            font-size: 0.875rem;
+            color: var(--gray-400);
+        }
+
+        .back-btn, .share-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .back-btn:active, .share-btn:active {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Main Content */
+        .app-main {
+            flex: 1;
+            padding: 20px;
+            padding-bottom: calc(var(--bottom-bar-height) + 20px + var(--safe-area-inset-bottom));
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .app-main.centered {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Upload Container */
+        .upload-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .upload-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .upload-card:active {
+            transform: scale(0.98);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .upload-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 24px;
+        }
+
+        .upload-card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .upload-card p {
+            color: var(--gray-400);
+            font-size: 0.875rem;
+            margin-bottom: 16px;
+        }
+
+        .url-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--white);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .url-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Files Preview */
+        .files-preview {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--border-radius);
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+
+        .files-preview h4 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--gray-300);
+        }
+
+        .files-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .file-item button {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        /* Bottom Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: calc(var(--bottom-bar-height) + var(--safe-area-inset-bottom));
+            padding: 16px 20px;
+            padding-bottom: calc(16px + var(--safe-area-inset-bottom));
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 100;
+        }
+
+        /* Buttons */
+        .btn-primary, .btn-outline {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary:disabled {
+            background: var(--gray-700);
+            color: var(--gray-500);
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-large {
+            width: 100%;
+            padding: 16px;
+            font-size: 1.125rem;
+        }
+
+        /* Plans */
+        .plans-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .plan-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 24px;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .plan-card.premium {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: var(--white);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .plan-header h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .plan-price {
+            font-size: 1.875rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 24px;
+        }
+
+        .plan-features li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px 0;
+            font-size: 0.875rem;
+            color: var(--gray-300);
+        }
+
+        .plan-features li i {
+            color: var(--secondary);
+            font-size: 0.75rem;
+        }
+
+        .plan-features li strong {
+            color: var(--white);
+        }
+
+        .btn-select {
+            width: 100%;
+        }
+
+        /* Analysis Progress */
+        .analysis-progress {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .progress-spinner {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 32px;
+        }
+
+        .spinner {
+            width: 100%;
+            height: 100%;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .progress-text {
+            margin-bottom: 40px;
+        }
+
+        .progress-text h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .progress-text p {
+            color: var(--gray-400);
+            font-size: 0.875rem;
+        }
+
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            opacity: 0.3;
+            transition: var(--transition);
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        .step i {
+            font-size: 24px;
+            color: var(--primary);
+        }
+
+        .step span {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+        }
+
+        /* Results */
+        .results-main {
+            padding-bottom: 20px;
+        }
+
+        .result-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .verdict-card {
+            text-align: center;
+            padding: 32px 20px;
+        }
+
+        .verdict-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+
+        .verdict-card.recommended {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .verdict-card.caution {
+            background: rgba(245, 158, 11, 0.1);
+            border-color: rgba(245, 158, 11, 0.3);
+        }
+
+        .verdict-card.not-recommended {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin: -20px;
+            padding: 20px;
+        }
+
+        .comparison-table table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 600px;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .comparison-table th {
+            font-weight: 600;
+            color: var(--gray-400);
+            font-size: 0.875rem;
+        }
+
+        .comparison-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .car-name {
+            font-weight: 600;
+            color: var(--white);
+        }
+
+        .highlight {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        /* Charts Container */
+        .charts-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .chart-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--border-radius);
+            padding: 20px;
+        }
+
+        .chart-card h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-400);
+        }
+
+        /* Progress Bars */
+        .progress-item {
+            margin-bottom: 16px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+            transition: width 1s ease-out;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: calc(var(--bottom-bar-height) + 20px);
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--gray-800);
+            color: var(--white);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Utilities */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Responsive */
+        @media (min-width: 768px) {
+            .app-header {
+                height: 80px;
+            }
+            
+            .app-main {
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            
+            .upload-container {
+                flex-direction: row;
+            }
+            
+            .upload-card {
+                flex: 1;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Dark mode scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- App Container -->
+    <div id="app" class="app-container">
+        
+        <!-- Step 1: Upload Screen -->
+        <div id="uploadScreen" class="screen active">
+            <header class="app-header">
+                <div class="header-content">
+                    <h1 class="app-title">
+                        <i class="fas fa-car-side"></i>
+                        AutoPrüfer Pro
+                    </h1>
+                    <div class="header-subtitle">KI-Analyse in 30 Sekunden</div>
+                </div>
+            </header>
+            
+            <main class="app-main">
+                <!-- Upload Options -->
+                <div class="upload-container">
+                    <!-- Photo Upload Card -->
+                    <div class="upload-card" id="photoUploadCard">
+                        <input type="file" id="photoInput" accept="image/*" multiple hidden>
+                        <div class="upload-icon">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <h3>Fotos hochladen</h3>
+                        <p>Machen Sie Fotos oder wählen Sie aus der Galerie</p>
+                        <button class="btn-outline" onclick="document.getElementById('photoInput').click()">
+                            <i class="fas fa-plus"></i> Fotos auswählen
+                        </button>
+                    </div>
+                    
+                    <!-- URL Input Card -->
+                    <div class="upload-card">
+                        <div class="upload-icon">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <h3>Link einfügen</h3>
+                        <p>Mobile.de, AutoScout24, eBay Kleinanzeigen</p>
+                        <input type="url" id="urlInput" placeholder="https://..." class="url-input">
+                    </div>
+                </div>
+                
+                <!-- Selected Files Preview -->
+                <div id="filesPreview" class="files-preview hidden">
+                    <h4>Ausgewählte Dateien</h4>
+                    <div id="filesList" class="files-list"></div>
+                </div>
+                
+                <!-- Bottom Action Bar -->
+                <div class="bottom-bar">
+                    <button id="analyzeBtn" class="btn-primary btn-large" disabled>
+                        <i class="fas fa-search"></i>
+                        <span>Analyse starten</span>
+                    </button>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Step 2: Plan Selection Screen -->
+        <div id="planScreen" class="screen">
+            <header class="app-header with-back">
+                <button class="back-btn" onclick="showScreen('uploadScreen')">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>Analyseumfang wählen</h2>
+            </header>
+            
+            <main class="app-main">
+                <div class="plans-container">
+                    <!-- Basic Plan -->
+                    <div class="plan-card" onclick="selectPlan('basic')">
+                        <div class="plan-header">
+                            <h3>Basis-Check</h3>
+                            <div class="plan-price">4,99€</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i> Schnelle KI-Analyse</li>
+                            <li><i class="fas fa-check"></i> Risikobewertung</li>
+                            <li><i class="fas fa-check"></i> Preisverhandlungstipps</li>
+                            <li><i class="fas fa-check"></i> Kaufempfehlung</li>
+                        </ul>
+                        <button class="btn-outline btn-select">
+                            Basis wählen
+                        </button>
+                    </div>
+                    
+                    <!-- Premium Plan -->
+                    <div class="plan-card premium">
+                        <div class="plan-badge">Beliebteste Wahl</div>
+                        <div class="plan-header">
+                            <h3>Premium-Analyse</h3>
+                            <div class="plan-price">16,99€</div>
+                        </div>
+                        <ul class="plan-features">
+                            <li><i class="fas fa-check"></i> Alles aus Basis-Check</li>
+                            <li><i class="fas fa-check"></i> 40+ Analyseparameter</li>
+                            <li><i class="fas fa-check"></i> <strong>Vergleich mit 3 Alternativen</strong></li>
+                            <li><i class="fas fa-check"></i> Interaktive Grafiken</li>
+                            <li><i class="fas fa-check"></i> Unterhaltskosten-Prognose</li>
+                            <li><i class="fas fa-check"></i> Chat-Beratung (10 Fragen)</li>
+                        </ul>
+                        <button class="btn-primary btn-select" onclick="selectPlan('premium')">
+                            Premium wählen
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Step 3: Analysis Screen -->
+        <div id="analysisScreen" class="screen">
+            <header class="app-header">
+                <h2>Analyse läuft...</h2>
+            </header>
+            
+            <main class="app-main centered">
+                <div class="analysis-progress">
+                    <div class="progress-spinner">
+                        <div class="spinner"></div>
+                    </div>
+                    <div class="progress-text">
+                        <h3 id="progressTitle">Fotos werden analysiert...</h3>
+                        <p id="progressSubtitle">Dies kann bis zu 60 Sekunden dauern</p>
+                    </div>
+                    <div class="progress-steps">
+                        <div class="step active" id="step1">
+                            <i class="fas fa-image"></i>
+                            <span>Bilder prüfen</span>
+                        </div>
+                        <div class="step" id="step2">
+                            <i class="fas fa-brain"></i>
+                            <span>KI-Analyse</span>
+                        </div>
+                        <div class="step" id="step3">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Bericht erstellen</span>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+        
+        <!-- Step 4: Results Screen -->
+        <div id="resultsScreen" class="screen">
+            <header class="app-header with-actions">
+                <button class="back-btn" onclick="resetApp()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h2>Analyseergebnis</h2>
+                <button class="share-btn" onclick="shareResults()">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </header>
+            
+            <main class="app-main results-main">
+                <div id="resultsContent">
+                    <!-- Dynamic content will be inserted here -->
+                </div>
+            </main>
+        </div>
+        
+    </div>
+    
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast"></div>
+    
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.6.2/countUp.umd.min.js"></script>
+    
+    <script>
+        // app.js - AutoPrüfer Pro Main Application (Embedded for local testing)
+
+        // Global state
+        const state = {
+            currentScreen: 'uploadScreen',
+            selectedFiles: [],
+            selectedPlan: null,
+            analysisResult: null
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Event listeners
+            document.getElementById('photoInput').addEventListener('change', handlePhotoSelect);
+            document.getElementById('urlInput').addEventListener('input', handleUrlInput);
+            document.getElementById('analyzeBtn').addEventListener('click', startAnalysis);
+            
+            // Drag and drop
+            const photoCard = document.getElementById('photoUploadCard');
+            photoCard.addEventListener('dragover', handleDragOver);
+            photoCard.addEventListener('drop', handleDrop);
+            
+            // Prevent default mobile behaviors
+            document.addEventListener('gesturestart', e => e.preventDefault());
+        }
+
+        // Screen navigation
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            document.getElementById(screenId).classList.add('active');
+            state.currentScreen = screenId;
+            
+            // Update UI based on screen
+            if (screenId === 'analysisScreen') {
+                simulateAnalysisProgress();
+            }
+        }
+
+        // File handling
+        function handlePhotoSelect(event) {
+            const files = Array.from(event.target.files);
+            addFiles(files);
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('drag-over');
+            
+            const files = Array.from(event.dataTransfer.files);
+            const imageFiles = files.filter(file => file.type.startsWith('image/'));
+            addFiles(imageFiles);
+        }
+
+        function addFiles(files) {
+            state.selectedFiles = [...state.selectedFiles, ...files];
+            updateFilesPreview();
+            checkAnalyzeButton();
+        }
+
+        function removeFile(index) {
+            state.selectedFiles.splice(index, 1);
+            updateFilesPreview();
+            checkAnalyzeButton();
+        }
+
+        function updateFilesPreview() {
+            const preview = document.getElementById('filesPreview');
+            const filesList = document.getElementById('filesList');
+            
+            if (state.selectedFiles.length === 0) {
+                preview.classList.add('hidden');
+                return;
+            }
+            
+            preview.classList.remove('hidden');
+            filesList.innerHTML = state.selectedFiles.map((file, index) => `
+                <div class="file-item">
+                    <span>${file.name}</span>
+                    <button onclick="removeFile(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // URL input handling
+        function handleUrlInput(event) {
+            checkAnalyzeButton();
+        }
+
+        function checkAnalyzeButton() {
+            const urlInput = document.getElementById('urlInput');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            
+            const hasFiles = state.selectedFiles.length > 0;
+            const hasUrl = urlInput.value.trim().length > 0;
+            
+            analyzeBtn.disabled = !hasFiles && !hasUrl;
+        }
+
+        // Analysis flow
+        function startAnalysis() {
+            showScreen('planScreen');
+        }
+
+        function selectPlan(plan) {
+            state.selectedPlan = plan;
+            // For demo, skip payment and go to analysis
+            showToast(`${plan === 'premium' ? 'Premium' : 'Basis'}-Plan ausgewählt`, 'success');
+            setTimeout(() => {
+                performAnalysis();
+            }, 1000);
+        }
+
+        async function performAnalysis() {
+            showScreen('analysisScreen');
+            
+            // Simulate API call
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // Mock result for demo
+            const mockResult = generateMockResult();
+            state.analysisResult = mockResult;
+            showResults(mockResult);
+        }
+
+        // Analysis progress animation
+        function simulateAnalysisProgress() {
+            const steps = ['step1', 'step2', 'step3'];
+            const titles = [
+                'Fotos werden analysiert...',
+                'KI verarbeitet Daten...',
+                'Bericht wird erstellt...'
+            ];
+            
+            let currentStep = 0;
+            
+            const interval = setInterval(() => {
+                if (currentStep < steps.length) {
+                    // Update active step
+                    document.querySelectorAll('.step').forEach(step => {
+                        step.classList.remove('active');
+                    });
+                    document.getElementById(steps[currentStep]).classList.add('active');
+                    
+                    // Update progress text
+                    document.getElementById('progressTitle').textContent = titles[currentStep];
+                    
+                    currentStep++;
+                } else {
+                    clearInterval(interval);
+                }
+            }, 1000);
+        }
+
+        // Show results
+        function showResults(result) {
+            showScreen('resultsScreen');
+            
+            const content = document.getElementById('resultsContent');
+            
+            if (state.selectedPlan === 'premium') {
+                content.innerHTML = generatePremiumResults(result);
+                // Initialize charts and animations after DOM update
+                setTimeout(() => {
+                    initializeCharts(result);
+                    animateStats(result);
+                    animateProgressBars();
+                }, 100);
+            } else {
+                content.innerHTML = generateBasicResults(result);
+            }
+        }
+
+        // Generate basic results HTML
+        function generateBasicResults(result) {
+            const verdictClass = result.verdict === 'recommended' ? 'recommended' : 
+                                result.verdict === 'caution' ? 'caution' : 'not-recommended';
+            
+            const verdictIcon = result.verdict === 'recommended' ? '✅' : 
+                               result.verdict === 'caution' ? '⚠️' : '❌';
+            
+            return `
+                <div class="result-card verdict-card ${verdictClass}">
+                    <div class="verdict-icon">${verdictIcon}</div>
+                    <h3>${result.summary}</h3>
+                </div>
+                
+                ${result.risks ? `
+                    <div class="result-card">
+                        <h4>🔍 Identifizierte Risiken</h4>
+                        <ul>
+                            ${result.risks.map(risk => `<li>${risk}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                
+                ${result.negotiation ? `
+                    <div class="result-card">
+                        <h4>💰 Verhandlungstipps</h4>
+                        <ul>
+                            ${result.negotiation.map(tip => `<li>${tip}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                
+                ${result.recommendations ? `
+                    <div class="result-card">
+                        <h4>💡 Weitere Empfehlungen</h4>
+                        <ul>
+                            ${result.recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        // Generate premium results HTML
+        function generatePremiumResults(result) {
+            const basicHTML = generateBasicResults(result);
+            
+            return `
+                ${basicHTML}
+                
+                <!-- Comparison Table -->
+                <div class="result-card">
+                    <h4>🚗 Vergleich mit Alternativen</h4>
+                    <div class="comparison-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Modell</th>
+                                    <th>Preis</th>
+                                    <th>Verbrauch</th>
+                                    <th>Versicherung</th>
+                                    <th>Zuverlässigkeit</th>
+                                    <th>Empfehlung</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${result.comparison.map(car => `
+                                    <tr>
+                                        <td class="car-name">${car.model}</td>
+                                        <td>${car.price}</td>
+                                        <td>${car.consumption}</td>
+                                        <td>${car.insurance}</td>
+                                        <td>${car.reliability}/5</td>
+                                        <td>${car.recommended ? '<span class="highlight">✓</span>' : '—'}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">⛽</div>
+                        <div class="stat-value" id="fuelStat">0</div>
+                        <div class="stat-label">L/100km</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🛡️</div>
+                        <div class="stat-value" id="insuranceStat">0</div>
+                        <div class="stat-label">€/Jahr</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🔧</div>
+                        <div class="stat-value" id="maintenanceStat">0</div>
+                        <div class="stat-label">€/Jahr</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📈</div>
+                        <div class="stat-value" id="resaleStat">0</div>
+                        <div class="stat-label">% nach 3J</div>
+                    </div>
+                </div>
+                
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h4>Monatliche Kosten</h4>
+                        <canvas id="costChart" width="400" height="300"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Wertverlust</h4>
+                        <canvas id="depreciationChart" width="400" height="300"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Technical Ratings -->
+                <div class="result-card">
+                    <h4>⚙️ Technische Bewertung</h4>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span>Motor</span>
+                            <span>85%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%" data-width="85%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span>Getriebe</span>
+                            <span>92%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%" data-width="92%"></div>
+                        </div>
+                    </div>
+                    <div class="progress-item">
+                        <div class="progress-header">
+                            <span>Elektronik</span>
+                            <span>78%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%" data-width="78%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize charts
+        function initializeCharts(result) {
+            // Cost Chart
+            const costCtx = document.getElementById('costChart')?.getContext('2d');
+            if (costCtx) {
+                new Chart(costCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Kraftstoff', 'Versicherung', 'Wartung', 'Steuer', 'Wertverlust'],
+                        datasets: [{
+                            data: [150, 100, 80, 22, 200],
+                            backgroundColor: [
+                                '#3b82f6',
+                                '#10b981',
+                                '#f59e0b',
+                                '#ef4444',
+                                '#8b5cf6'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#fff' }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Depreciation Chart
+            const depCtx = document.getElementById('depreciationChart')?.getContext('2d');
+            if (depCtx) {
+                new Chart(depCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jetzt', '1 Jahr', '2 Jahre', '3 Jahre'],
+                        datasets: [{
+                            label: 'Wert',
+                            data: [24900, 21500, 18500, 16000],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { 
+                                    color: '#fff',
+                                    callback: value => value.toLocaleString('de-DE') + '€'
+                                },
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                            },
+                            x: {
+                                ticks: { color: '#fff' },
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Animate statistics
+        function animateStats(result) {
+            const stats = [
+                { id: 'fuelStat', value: 5.5 },
+                { id: 'insuranceStat', value: 1200 },
+                { id: 'maintenanceStat', value: 1500 },
+                { id: 'resaleStat', value: 64 }
+            ];
+            
+            stats.forEach(stat => {
+                const element = document.getElementById(stat.id);
+                if (element) {
+                    const countUp = new countUp.CountUp(stat.id, stat.value, {
+                        duration: 2,
+                        separator: '.',
+                        decimal: ',',
+                        decimalPlaces: stat.value < 10 ? 1 : 0
+                    });
+                    if (!countUp.error) {
+                        countUp.start();
+                    }
+                }
+            });
+        }
+
+        // Animate progress bars
+        function animateProgressBars() {
+            const progressBars = document.querySelectorAll('.progress-fill');
+            progressBars.forEach((bar, index) => {
+                setTimeout(() => {
+                    bar.style.width = bar.getAttribute('data-width');
+                }, index * 200);
+            });
+        }
+
+        // Toast notifications
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Share results
+        function shareResults() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'AutoPrüfer Pro Analyse',
+                    text: 'Ich habe mein Auto mit AutoPrüfer Pro analysiert!',
+                    url: window.location.href
+                });
+            } else {
+                showToast('Teilen ist auf diesem Gerät nicht verfügbar');
+            }
+        }
+
+        // Reset app
+        function resetApp() {
+            state.selectedFiles = [];
+            state.selectedPlan = null;
+            state.analysisResult = null;
+            
+            document.getElementById('photoInput').value = '';
+            document.getElementById('urlInput').value = '';
+            updateFilesPreview();
+            checkAnalyzeButton();
+            
+            showScreen('uploadScreen');
+        }
+
+        // Mock data generator for demo
+        function generateMockResult() {
+            return {
+                verdict: 'caution',
+                summary: 'Mit Vorsicht zu genießen - einige Punkte sollten geprüft werden',
+                risks: [
+                    'Steuerkette sollte bei diesem Kilometerstand geprüft werden',
+                    'AGR-Ventil könnte Probleme machen',
+                    'Bremsscheiben vermutlich bald fällig'
+                ],
+                negotiation: [
+                    'Steuerketten-Inspektion als Argument (1500-2500€)',
+                    'Große Inspektion fällig (800-1200€)',
+                    'Realistischer Spielraum: 1000-1500€'
+                ],
+                recommendations: [
+                    'Unbedingt Probefahrt mit kaltem Motor',
+                    'Service-Historie komplett prüfen',
+                    'OBD-Diagnose durchführen lassen'
+                ],
+                comparison: [
+                    {
+                        model: 'BMW 320d (Analysiert)',
+                        price: '24.900€',
+                        consumption: '5.5L',
+                        insurance: '1.200€',
+                        reliability: 4,
+                        recommended: true
+                    },
+                    {
+                        model: 'Mercedes C220d',
+                        price: '26.500€',
+                        consumption: '5.2L',
+                        insurance: '1.350€',
+                        reliability: 4,
+                        recommended: false
+                    },
+                    {
+                        model: 'Audi A4 40 TDI',
+                        price: '25.800€',
+                        consumption: '5.4L',
+                        insurance: '1.280€',
+                        reliability: 3,
+                        recommended: false
+                    },
+                    {
+                        model: 'VW Passat 2.0 TDI',
+                        price: '22.900€',
+                        consumption: '5.1L',
+                        insurance: '980€',
+                        reliability: 4,
+                        recommended: true
+                    }
+                ]
+            };
+        }
+    </script>
+</body>
+</html>
