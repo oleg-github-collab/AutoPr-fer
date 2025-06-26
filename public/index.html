@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#1e40af">
+    <meta name="theme-color" content="#0a1628">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="description" content="AutoPrüfer Pro - Professionelle KI-gestützte Fahrzeuganalyse in 30 Sekunden. Vertrauenswürdige Bewertungen für Gebrauchtwagen.">
     
-    <title>AutoPrüfer Pro - KI Auto-Analyse</title>
+    <title>AutoPrüfer Pro - KI Fahrzeuganalyse | Vertrauenswürdig & Schnell</title>
     
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
@@ -18,73 +19,124 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <!-- Styles -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
+    <!-- Animated Background -->
+    <div class="animated-bg">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <div class="gradient-orb orb-4"></div>
+    </div>
+    
     <!-- App Container -->
     <div id="app" class="app-container">
         
         <!-- Step 1: Upload Screen -->
         <div id="uploadScreen" class="screen active">
-            <header class="app-header">
+            <header class="app-header glass-morphism">
                 <div class="header-content">
-                    <h1 class="app-title">
-                        <i class="fas fa-car-side"></i>
-                        AutoPrüfer Pro
-                    </h1>
-                    <div class="header-subtitle">KI-Analyse in 30 Sekunden</div>
+                    <div class="logo-wrapper">
+                        <div class="logo-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="logo-text">
+                            <h1 class="app-title">AutoPrüfer Pro</h1>
+                            <div class="header-subtitle">KI-Analyse in 30 Sekunden</div>
+                        </div>
+                    </div>
+                    <div class="trust-badges">
+                        <span class="badge"><i class="fas fa-check-circle"></i> TÜV geprüft</span>
+                        <span class="badge"><i class="fas fa-lock"></i> SSL gesichert</span>
+                    </div>
                 </div>
             </header>
             
             <main class="app-main">
+                <!-- Hero Section -->
+                <div class="hero-section glass-morphism">
+                    <h2 class="hero-title">Ihr Auto-Experte in der Tasche</h2>
+                    <p class="hero-subtitle">Professionelle Fahrzeuganalyse mit modernster KI-Technologie</p>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-number">50.000+</span>
+                            <span class="stat-label">Analysen</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">98%</span>
+                            <span class="stat-label">Genauigkeit</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">4.9★</span>
+                            <span class="stat-label">Bewertung</span>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Upload Options -->
                 <div class="upload-container">
                     <!-- Photo Upload Card -->
-                    <div class="upload-card" id="photoUploadCard">
+                    <div class="upload-card glass-morphism hover-lift" id="photoUploadCard">
                         <input type="file" id="photoInput" accept="image/*" multiple hidden>
-                        <div class="upload-icon">
+                        <div class="upload-icon glass-icon">
                             <i class="fas fa-camera"></i>
                         </div>
                         <h3>Fotos hochladen</h3>
                         <p>Machen Sie Fotos oder wählen Sie aus der Galerie</p>
-                        <button class="btn-outline" onclick="document.getElementById('photoInput').click()">
+                        <button class="btn-glass" onclick="document.getElementById('photoInput').click()">
                             <i class="fas fa-plus"></i> Fotos auswählen
                         </button>
                     </div>
                     
                     <!-- URL Input Card -->
-                    <div class="upload-card">
-                        <div class="upload-icon">
+                    <div class="upload-card glass-morphism hover-lift">
+                        <div class="upload-icon glass-icon">
                             <i class="fas fa-link"></i>
                         </div>
                         <h3>Link einfügen</h3>
                         <p>Mobile.de, AutoScout24, eBay Kleinanzeigen</p>
-                        <input type="url" id="urlInput" placeholder="https://..." class="url-input">
+                        <input type="url" id="urlInput" placeholder="https://..." class="url-input glass-input">
                     </div>
                 </div>
                 
                 <!-- Selected Files Preview -->
-                <div id="filesPreview" class="files-preview hidden">
-                    <h4>Ausgewählte Dateien</h4>
+                <div id="filesPreview" class="files-preview glass-morphism hidden">
+                    <h4><i class="fas fa-images"></i> Ausgewählte Dateien</h4>
                     <div id="filesList" class="files-list"></div>
                 </div>
                 
                 <!-- Bottom Action Bar -->
-                <div class="bottom-bar">
-                    <button id="analyzeBtn" class="btn-primary btn-large" disabled>
+                <div class="bottom-bar glass-morphism">
+                    <button id="analyzeBtn" class="btn-primary btn-large glow-effect" disabled>
                         <i class="fas fa-search"></i>
                         <span>Analyse starten</span>
                     </button>
                 </div>
+                
+                <!-- Footer -->
+                <footer class="app-footer">
+                    <div class="footer-content">
+                        <div class="footer-links">
+                            <a href="#" onclick="openModal('impressumModal'); return false;">Impressum</a>
+                            <a href="#" onclick="openModal('privacyModal'); return false;">Datenschutz</a>
+                            <a href="#" onclick="openModal('termsModal'); return false;">AGB</a>
+                            <a href="#" onclick="openModal('cookieSettingsModal'); return false;">Cookie-Einstellungen</a>
+                        </div>
+                        <div class="footer-copyright">
+                            © 2025 AutoPrüfer Pro GmbH. Alle Rechte vorbehalten.
+                        </div>
+                    </div>
+                </footer>
             </main>
         </div>
         
         <!-- Step 2: Plan Selection Screen -->
         <div id="planScreen" class="screen">
-            <header class="app-header with-back">
-                <button class="back-btn" onclick="showScreen('uploadScreen')">
+            <header class="app-header glass-morphism with-back">
+                <button class="back-btn glass-button" onclick="showScreen('uploadScreen')">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <h2>Analyseumfang wählen</h2>
@@ -93,10 +145,13 @@
             <main class="app-main">
                 <div class="plans-container">
                     <!-- Basic Plan -->
-                    <div class="plan-card" onclick="selectPlan('basic')">
+                    <div class="plan-card glass-morphism hover-lift" onclick="selectPlan('basic')">
                         <div class="plan-header">
                             <h3>Basis-Check</h3>
-                            <div class="plan-price">4,99€</div>
+                            <div class="plan-price">
+                                <span class="currency">€</span>
+                                <span class="amount">4,99</span>
+                            </div>
                         </div>
                         <ul class="plan-features">
                             <li><i class="fas fa-check"></i> Schnelle KI-Analyse</li>
@@ -104,27 +159,30 @@
                             <li><i class="fas fa-check"></i> Preisverhandlungstipps</li>
                             <li><i class="fas fa-check"></i> Kaufempfehlung</li>
                         </ul>
-                        <button class="btn-outline btn-select">
+                        <button class="btn-glass btn-select">
                             Basis wählen
                         </button>
                     </div>
                     
                     <!-- Premium Plan -->
-                    <div class="plan-card premium">
-                        <div class="plan-badge">Beliebteste Wahl</div>
+                    <div class="plan-card premium glass-morphism hover-lift">
+                        <div class="plan-badge pulse">Beliebteste Wahl</div>
                         <div class="plan-header">
                             <h3>Premium-Analyse</h3>
-                            <div class="plan-price">16,99€</div>
+                            <div class="plan-price">
+                                <span class="currency">€</span>
+                                <span class="amount">16,99</span>
+                            </div>
                         </div>
                         <ul class="plan-features">
                             <li><i class="fas fa-check"></i> Alles aus Basis-Check</li>
                             <li><i class="fas fa-check"></i> 40+ Analyseparameter</li>
-                            <li><i class="fas fa-check"></i> <strong>Vergleich mit 3 Alternativen</strong></li>
-                            <li><i class="fas fa-check"></i> Interaktive Grafiken</li>
-                            <li><i class="fas fa-check"></i> Unterhaltskosten-Prognose</li>
-                            <li><i class="fas fa-check"></i> Chat-Beratung (10 Fragen)</li>
+                            <li><i class="fas fa-star"></i> <strong>Vergleich mit 3 Alternativen</strong></li>
+                            <li><i class="fas fa-chart-line"></i> Interaktive Grafiken</li>
+                            <li><i class="fas fa-calculator"></i> Unterhaltskosten-Prognose</li>
+                            <li><i class="fas fa-comments"></i> Chat-Beratung (10 Fragen)</li>
                         </ul>
-                        <button class="btn-primary btn-select" onclick="selectPlan('premium')">
+                        <button class="btn-primary btn-select glow-effect" onclick="selectPlan('premium')">
                             Premium wählen
                         </button>
                     </div>
@@ -134,14 +192,19 @@
         
         <!-- Step 3: Analysis Screen -->
         <div id="analysisScreen" class="screen">
-            <header class="app-header">
+            <header class="app-header glass-morphism">
                 <h2>Analyse läuft...</h2>
             </header>
             
             <main class="app-main centered">
-                <div class="analysis-progress">
+                <div class="analysis-progress glass-morphism">
                     <div class="progress-spinner">
-                        <div class="spinner"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-center">
+                            <i class="fas fa-car"></i>
+                        </div>
                     </div>
                     <div class="progress-text">
                         <h3 id="progressTitle">Fotos werden analysiert...</h3>
@@ -149,15 +212,21 @@
                     </div>
                     <div class="progress-steps">
                         <div class="step active" id="step1">
-                            <i class="fas fa-image"></i>
+                            <div class="step-icon">
+                                <i class="fas fa-image"></i>
+                            </div>
                             <span>Bilder prüfen</span>
                         </div>
                         <div class="step" id="step2">
-                            <i class="fas fa-brain"></i>
+                            <div class="step-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
                             <span>KI-Analyse</span>
                         </div>
                         <div class="step" id="step3">
-                            <i class="fas fa-chart-bar"></i>
+                            <div class="step-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
                             <span>Bericht erstellen</span>
                         </div>
                     </div>
@@ -167,12 +236,12 @@
         
         <!-- Step 4: Results Screen -->
         <div id="resultsScreen" class="screen">
-            <header class="app-header with-actions">
-                <button class="back-btn" onclick="resetApp()">
+            <header class="app-header glass-morphism with-actions">
+                <button class="back-btn glass-button" onclick="resetApp()">
                     <i class="fas fa-times"></i>
                 </button>
                 <h2>Analyseergebnis</h2>
-                <button class="share-btn" onclick="shareResults()">
+                <button class="share-btn glass-button" onclick="shareResults()">
                     <i class="fas fa-share-alt"></i>
                 </button>
             </header>
@@ -181,13 +250,252 @@
                 <div id="resultsContent">
                     <!-- Dynamic content will be inserted here -->
                 </div>
+                
+                <!-- Results Footer -->
+                <div class="results-footer glass-morphism">
+                    <button class="btn-primary btn-large glow-effect" onclick="downloadReport()">
+                        <i class="fas fa-download"></i> Bericht herunterladen
+                    </button>
+                    <button class="btn-glass btn-large" onclick="resetApp()">
+                        <i class="fas fa-redo"></i> Neue Analyse
+                    </button>
+                </div>
             </main>
         </div>
         
     </div>
     
+    <!-- Cookie Banner -->
+    <div id="cookieBanner" class="cookie-banner glass-morphism">
+        <div class="cookie-content">
+            <h4>Diese Website nutzt Cookies</h4>
+            <p>Wir verwenden Cookies, um Ihre Erfahrung zu verbessern und unsere Dienste zu optimieren.</p>
+            <div class="cookie-actions">
+                <button class="btn-glass" onclick="openModal('cookieSettingsModal')">Einstellungen</button>
+                <button class="btn-primary" onclick="acceptAllCookies()">Alle akzeptieren</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <!-- Impressum Modal -->
+    <div id="impressumModal" class="modal">
+        <div class="modal-backdrop" onclick="closeModal('impressumModal')"></div>
+        <div class="modal-content glass-morphism">
+            <div class="modal-header">
+                <h3>Impressum</h3>
+                <button class="modal-close" onclick="closeModal('impressumModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>AutoPrüfer Pro GmbH</h4>
+                <p>
+                    Musterstraße 123<br>
+                    30159 Hannover<br>
+                    Deutschland
+                </p>
+                
+                <h5>Vertreten durch:</h5>
+                <p>Max Mustermann (Geschäftsführer)</p>
+                
+                <h5>Kontakt:</h5>
+                <p>
+                    Telefon: +49 (0) 511 123456<br>
+                    E-Mail: info@autopruefer-pro.de
+                </p>
+                
+                <h5>Registereintrag:</h5>
+                <p>
+                    Handelsregister: HRB 123456<br>
+                    Registergericht: Amtsgericht Hannover
+                </p>
+                
+                <h5>Umsatzsteuer-ID:</h5>
+                <p>USt-IdNr.: DE123456789</p>
+                
+                <h5>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</h5>
+                <p>Max Mustermann<br>
+                    Musterstraße 123<br>
+                    30159 Hannover
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Privacy Modal -->
+    <div id="privacyModal" class="modal">
+        <div class="modal-backdrop" onclick="closeModal('privacyModal')"></div>
+        <div class="modal-content glass-morphism">
+            <div class="modal-header">
+                <h3>Datenschutzerklärung</h3>
+                <button class="modal-close" onclick="closeModal('privacyModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>1. Datenschutz auf einen Blick</h4>
+                <h5>Allgemeine Hinweise</h5>
+                <p>Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese Website besuchen.</p>
+                
+                <h5>Datenerfassung auf dieser Website</h5>
+                <p><strong>Wer ist verantwortlich für die Datenerfassung auf dieser Website?</strong><br>
+                Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten können Sie dem Impressum dieser Website entnehmen.</p>
+                
+                <p><strong>Wie erfassen wir Ihre Daten?</strong><br>
+                Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen. Hierbei kann es sich z.B. um Daten handeln, die Sie bei der Fahrzeuganalyse hochladen.</p>
+                
+                <h4>2. Hosting</h4>
+                <p>Die Inhalte unserer Website werden bei folgendem Anbieter gehostet:</p>
+                <h5>Externes Hosting</h5>
+                <p>Diese Website wird extern gehostet. Die personenbezogenen Daten, die auf dieser Website erfasst werden, werden auf den Servern des Hosters gespeichert.</p>
+                
+                <h4>3. Allgemeine Hinweise und Pflichtinformationen</h4>
+                <h5>Datenschutz</h5>
+                <p>Die Betreiber dieser Seiten nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerklärung.</p>
+                
+                <h5>Hinweis zur verantwortlichen Stelle</h5>
+                <p>Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:</p>
+                <p>
+                    AutoPrüfer Pro GmbH<br>
+                    Max Mustermann<br>
+                    Musterstraße 123<br>
+                    30159 Hannover<br>
+                    Telefon: +49 (0) 511 123456<br>
+                    E-Mail: datenschutz@autopruefer-pro.de
+                </p>
+                
+                <h5>Widerruf Ihrer Einwilligung zur Datenverarbeitung</h5>
+                <p>Viele Datenverarbeitungsvorgänge sind nur mit Ihrer ausdrücklichen Einwilligung möglich. Sie können eine bereits erteilte Einwilligung jederzeit widerrufen.</p>
+                
+                <h5>Beschwerderecht bei der zuständigen Aufsichtsbehörde</h5>
+                <p>Im Falle von Verstößen gegen die DSGVO steht den Betroffenen ein Beschwerderecht bei einer Aufsichtsbehörde zu.</p>
+                
+                <h4>4. Datenerfassung auf dieser Website</h4>
+                <h5>Cookies</h5>
+                <p>Unsere Internetseiten verwenden so genannte „Cookies". Cookies sind kleine Textdateien und richten auf Ihrem Endgerät keinen Schaden an.</p>
+                
+                <h5>Analyse der Fahrzeugbilder</h5>
+                <p>Die von Ihnen hochgeladenen Fahrzeugbilder werden ausschließlich für die Analyse verwendet und nach Abschluss der Analyse automatisch gelöscht. Eine dauerhafte Speicherung erfolgt nicht.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Terms Modal -->
+    <div id="termsModal" class="modal">
+        <div class="modal-backdrop" onclick="closeModal('termsModal')"></div>
+        <div class="modal-content glass-morphism">
+            <div class="modal-header">
+                <h3>Allgemeine Geschäftsbedingungen</h3>
+                <button class="modal-close" onclick="closeModal('termsModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>§ 1 Geltungsbereich</h4>
+                <p>(1) Diese Allgemeinen Geschäftsbedingungen (nachfolgend "AGB") gelten für alle über unsere Website www.autopruefer-pro.de geschlossenen Verträge zwischen uns, der AutoPrüfer Pro GmbH, und Ihnen als unseren Kunden.</p>
+                
+                <h4>§ 2 Vertragsgegenstand</h4>
+                <p>(1) Gegenstand des Vertrags ist die Erbringung einer KI-gestützten Fahrzeuganalyse auf Basis der vom Kunden zur Verfügung gestellten Bilder und/oder Links.</p>
+                <p>(2) Die Analyse stellt eine Einschätzung dar und ersetzt keine professionelle Fahrzeugprüfung vor Ort.</p>
+                
+                <h4>§ 3 Vertragsschluss</h4>
+                <p>(1) Die Darstellung der Leistungen auf unserer Website stellt kein rechtlich bindendes Angebot, sondern eine Aufforderung zur Bestellung dar.</p>
+                <p>(2) Durch Klicken des Buttons "Kostenpflichtig bestellen" geben Sie eine verbindliche Bestellung ab.</p>
+                
+                <h4>§ 4 Preise und Zahlung</h4>
+                <p>(1) Es gelten die zum Zeitpunkt der Bestellung angegebenen Preise.</p>
+                <p>(2) Die Zahlung erfolgt über die angebotenen Zahlungsmethoden.</p>
+                
+                <h4>§ 5 Leistungserbringung</h4>
+                <p>(1) Die Analyse wird innerhalb von 60 Sekunden nach erfolgreicher Zahlung durchgeführt.</p>
+                <p>(2) Das Ergebnis wird Ihnen online zur Verfügung gestellt.</p>
+                
+                <h4>§ 6 Widerrufsrecht</h4>
+                <p>(1) Verbrauchern steht ein Widerrufsrecht nach Maßgabe der gesetzlichen Bestimmungen zu.</p>
+                <p>(2) Das Widerrufsrecht erlischt vorzeitig, wenn wir mit der Ausführung der Dienstleistung mit Ihrer ausdrücklichen Zustimmung begonnen haben.</p>
+                
+                <h4>§ 7 Haftung</h4>
+                <p>(1) Wir haften unbeschränkt für Vorsatz und grobe Fahrlässigkeit.</p>
+                <p>(2) Bei leichter Fahrlässigkeit haften wir nur bei Verletzung wesentlicher Vertragspflichten.</p>
+                
+                <h4>§ 8 Datenschutz</h4>
+                <p>Die Verarbeitung personenbezogener Daten erfolgt gemäß unserer Datenschutzerklärung.</p>
+                
+                <h4>§ 9 Schlussbestimmungen</h4>
+                <p>(1) Es gilt das Recht der Bundesrepublik Deutschland.</p>
+                <p>(2) Gerichtsstand ist Hannover, sofern der Kunde Kaufmann ist.</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cookie Settings Modal -->
+    <div id="cookieSettingsModal" class="modal">
+        <div class="modal-backdrop" onclick="closeModal('cookieSettingsModal')"></div>
+        <div class="modal-content glass-morphism">
+            <div class="modal-header">
+                <h3>Cookie-Einstellungen</h3>
+                <button class="modal-close" onclick="closeModal('cookieSettingsModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Wir verwenden Cookies, um Inhalte und Anzeigen zu personalisieren, Funktionen für soziale Medien anbieten zu können und die Zugriffe auf unsere Website zu analysieren.</p>
+                
+                <div class="cookie-category">
+                    <div class="cookie-header">
+                        <h5>Notwendige Cookies</h5>
+                        <label class="switch disabled">
+                            <input type="checkbox" checked disabled>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <p>Diese Cookies sind für die Grundfunktionen der Website erforderlich.</p>
+                </div>
+                
+                <div class="cookie-category">
+                    <div class="cookie-header">
+                        <h5>Funktionale Cookies</h5>
+                        <label class="switch">
+                            <input type="checkbox" id="functionalCookies">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <p>Diese Cookies ermöglichen erweiterte Funktionen und Personalisierung.</p>
+                </div>
+                
+                <div class="cookie-category">
+                    <div class="cookie-header">
+                        <h5>Analyse-Cookies</h5>
+                        <label class="switch">
+                            <input type="checkbox" id="analyticsCookies">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <p>Diese Cookies helfen uns, die Nutzung unserer Website zu verstehen und zu verbessern.</p>
+                </div>
+                
+                <div class="cookie-category">
+                    <div class="cookie-header">
+                        <h5>Marketing-Cookies</h5>
+                        <label class="switch">
+                            <input type="checkbox" id="marketingCookies">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <p>Diese Cookies werden verwendet, um Werbung relevanter zu gestalten.</p>
+                </div>
+                
+                <div class="cookie-actions">
+                    <button class="btn-glass" onclick="saveSelectedCookies()">Auswahl speichern</button>
+                    <button class="btn-primary" onclick="acceptAllCookies()">Alle akzeptieren</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Toast Notifications -->
-    <div id="toast" class="toast"></div>
+    <div id="toast" class="toast glass-morphism"></div>
     
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
