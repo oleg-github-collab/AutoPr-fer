@@ -2,34 +2,39 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#0a1628">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#050813">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="description" content="AutoPrüfer Pro - Professionelle KI-gestützte Fahrzeuganalyse in 30 Sekunden. Vertrauenswürdige Bewertungen für Gebrauchtwagen.">
+    <meta name="description" content="AutoPrüfer Pro - Professionelle KI-gestützte Fahrzeuganalyse in 30 Sekunden. Vertrauenswürdige Bewertungen für Gebrauchtwagen mit Premium-Technologie.">
+    <meta name="keywords" content="Fahrzeuganalyse, KI, Gebrauchtwagen, Auto kaufen, Fahrzeugbewertung, BMW, Mercedes, Audi, VW">
     
-    <title>AutoPrüfer Pro - KI Fahrzeuganalyse | Vertrauenswürdig & Schnell</title>
+    <title>AutoPrüfer Pro - KI Fahrzeuganalyse | Premium Auto-Check</title>
     
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/logo-192.png">
+    <link rel="icon" type="image/png" href="/favicon.png">
     
-    <!-- Preconnect -->
+    <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://js.stripe.com">
+    
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- Styles -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
-    <!-- Animated Background -->
+    <!-- Premium Animated Background -->
     <div class="animated-bg">
         <div class="gradient-orb orb-1"></div>
         <div class="gradient-orb orb-2"></div>
         <div class="gradient-orb orb-3"></div>
-        <div class="gradient-orb orb-4"></div>
+        <canvas id="particleCanvas"></canvas>
     </div>
     
     <!-- App Container -->
@@ -39,7 +44,7 @@
         <div id="uploadScreen" class="screen active">
             <header class="app-header glass-morphism">
                 <div class="header-content">
-                    <div class="logo-wrapper">
+                    <div class="logo-wrapper animate-on-scroll">
                         <div class="logo-icon">
                             <i class="fas fa-shield-alt"></i>
                         </div>
@@ -48,76 +53,170 @@
                             <div class="header-subtitle">KI-Analyse in 30 Sekunden</div>
                         </div>
                     </div>
-                    <div class="trust-badges">
-                        <span class="badge"><i class="fas fa-check-circle"></i> TÜV geprüft</span>
-                        <span class="badge"><i class="fas fa-lock"></i> SSL gesichert</span>
+                    <div class="trust-badges animate-on-scroll">
+                        <span class="badge" data-tooltip="TÜV-geprüfte Analysemethoden">
+                            <i class="fas fa-check-circle"></i> TÜV geprüft
+                        </span>
+                        <span class="badge" data-tooltip="SSL-verschlüsselte Verbindung">
+                            <i class="fas fa-lock"></i> SSL gesichert
+                        </span>
+                        <span class="badge" data-tooltip="DSGVO-konform">
+                            <i class="fas fa-shield-alt"></i> DSGVO
+                        </span>
                     </div>
                 </div>
             </header>
             
             <main class="app-main">
                 <!-- Hero Section -->
-                <div class="hero-section glass-morphism">
+                <div class="hero-section glass-morphism animate-on-scroll parallax" data-speed="0.5">
+                    <div class="hero-badge">NEU: Premium-Analyse mit KI 4.0</div>
                     <h2 class="hero-title">Ihr Auto-Experte in der Tasche</h2>
                     <p class="hero-subtitle">Professionelle Fahrzeuganalyse mit modernster KI-Technologie</p>
                     <div class="hero-stats">
-                        <div class="stat">
-                            <span class="stat-number">50.000+</span>
+                        <div class="stat animate-counter">
+                            <span class="stat-number" data-count="50000">0</span>
                             <span class="stat-label">Analysen</span>
                         </div>
-                        <div class="stat">
-                            <span class="stat-number">98%</span>
+                        <div class="stat animate-counter">
+                            <span class="stat-number" data-count="98">0</span>%
                             <span class="stat-label">Genauigkeit</span>
                         </div>
-                        <div class="stat">
-                            <span class="stat-number">4.9★</span>
+                        <div class="stat animate-counter">
+                            <span class="stat-number" data-count="4.9" data-decimal="1">0</span>★
                             <span class="stat-label">Bewertung</span>
                         </div>
                     </div>
                 </div>
                 
+                <!-- Vehicle Type Selector -->
+                <div class="vehicle-type-section animate-on-scroll">
+                    <h3 class="section-title">
+                        <i class="fas fa-car"></i> 
+                        Fahrzeugtyp wählen <span class="optional-badge">Optional</span>
+                    </h3>
+                    <div class="vehicle-type-grid">
+                        <div class="vehicle-type-option interactive" data-type="luxury">
+                            <i class="fas fa-gem"></i>
+                            <span>Premium</span>
+                            <small>BMW, Mercedes, Audi</small>
+                        </div>
+                        <div class="vehicle-type-option interactive" data-type="standard">
+                            <i class="fas fa-car-side"></i>
+                            <span>Standard</span>
+                            <small>VW, Ford, Opel</small>
+                        </div>
+                        <div class="vehicle-type-option interactive" data-type="commercial">
+                            <i class="fas fa-truck"></i>
+                            <span>Nutzfahrzeug</span>
+                            <small>Transporter, LKW</small>
+                        </div>
+                        <div class="vehicle-type-option interactive" data-type="classic">
+                            <i class="fas fa-clock"></i>
+                            <span>Oldtimer</span>
+                            <small>Klassiker</small>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Upload Options -->
-                <div class="upload-container">
+                <div class="upload-container animate-on-scroll">
                     <!-- Photo Upload Card -->
-                    <div class="upload-card glass-morphism hover-lift" id="photoUploadCard">
+                    <div class="upload-card glass-morphism hover-lift interactive" id="photoUploadCard">
                         <input type="file" id="photoInput" accept="image/*" multiple hidden>
                         <div class="upload-icon glass-icon">
                             <i class="fas fa-camera"></i>
+                            <div class="ripple"></div>
                         </div>
                         <h3>Fotos hochladen</h3>
-                        <p>Machen Sie Fotos oder wählen Sie aus der Galerie</p>
-                        <button class="btn-glass" onclick="document.getElementById('photoInput').click()">
+                        <p>Ziehen Sie Fotos hierher oder klicken Sie</p>
+                        <button class="btn btn-glass" onclick="document.getElementById('photoInput').click()">
                             <i class="fas fa-plus"></i> Fotos auswählen
                         </button>
+                        <div class="upload-hint">
+                            <i class="fas fa-info-circle"></i>
+                            Bis zu 10 Fotos, je 10MB
+                        </div>
                     </div>
                     
                     <!-- URL Input Card -->
-                    <div class="upload-card glass-morphism hover-lift">
+                    <div class="upload-card glass-morphism hover-lift interactive">
                         <div class="upload-icon glass-icon">
                             <i class="fas fa-link"></i>
+                            <div class="ripple"></div>
                         </div>
-                        <h3>Link einfügen</h3>
+                        <h3>Link zum Inserat</h3>
                         <p>Mobile.de, AutoScout24, eBay Kleinanzeigen</p>
-                        <input type="url" id="urlInput" placeholder="https://..." class="url-input glass-input">
+                        <div class="url-input-wrapper">
+                            <input type="url" id="urlInput" placeholder="https://..." class="glass-input" autocomplete="url">
+                            <div class="url-status"></div>
+                        </div>
+                        <div class="supported-sites">
+                            <img src="/img/mobile-de-logo.svg" alt="Mobile.de" data-tooltip="Mobile.de">
+                            <img src="/img/autoscout24-logo.svg" alt="AutoScout24" data-tooltip="AutoScout24">
+                            <img src="/img/ebay-kleinanzeigen-logo.svg" alt="eBay Kleinanzeigen" data-tooltip="eBay Kleinanzeigen">
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Selected Files Preview -->
-                <div id="filesPreview" class="files-preview glass-morphism hidden">
+                <div id="filesPreview" class="files-preview glass-morphism hidden animate-on-scroll">
                     <h4><i class="fas fa-images"></i> Ausgewählte Dateien</h4>
                     <div id="filesList" class="files-list"></div>
                 </div>
                 
                 <!-- Bottom Action Bar -->
                 <div class="bottom-bar glass-morphism">
-                    <button id="analyzeBtn" class="btn-primary btn-large glow-effect" disabled>
-                        <i class="fas fa-search"></i>
-                        <span>Analyse starten</span>
-                    </button>
+                    <div class="action-content">
+                        <button id="analyzeBtn" class="btn btn-primary btn-large glow-effect interactive" disabled>
+                            <i class="fas fa-search"></i>
+                            <span>Analyse starten</span>
+                            <div class="button-particles"></div>
+                        </button>
+                        <div class="secure-badge">
+                            <i class="fas fa-shield-alt"></i>
+                            Sichere Verbindung • Keine Datenspeicherung
+                        </div>
+                    </div>
                 </div>
                 
+                <!-- Features Section -->
+                <section class="features-section">
+                    <h3 class="section-title animate-on-scroll">Warum AutoPrüfer Pro?</h3>
+                    <div class="features-grid">
+                        <div class="feature-card glass-morphism animate-on-scroll">
+                            <div class="feature-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h4>KI 4.0 Technologie</h4>
+                            <p>Modernste Künstliche Intelligenz analysiert jedes Detail</p>
+                        </div>
+                        <div class="feature-card glass-morphism animate-on-scroll">
+                            <div class="feature-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <h4>30 Sekunden</h4>
+                            <p>Blitzschnelle Analyse in Echtzeit</p>
+                        </div>
+                        <div class="feature-card glass-morphism animate-on-scroll">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h4>40+ Parameter</h4>
+                            <p>Umfassende Bewertung aller wichtigen Aspekte</p>
+                        </div>
+                        <div class="feature-card glass-morphism animate-on-scroll">
+                            <div class="feature-icon">
+                                <i class="fas fa-euro-sign"></i>
+                            </div>
+                            <h4>Faire Preise</h4>
+                            <p>Transparente Kosten ohne versteckte Gebühren</p>
+                        </div>
+                    </div>
+                </section>
+                
                 <!-- Footer -->
-                <footer class="app-footer">
+                <footer class="app-footer animate-on-scroll">
                     <div class="footer-content">
                         <div class="footer-links">
                             <a href="#" onclick="openModal('impressumModal'); return false;">Impressum</a>
@@ -128,6 +227,14 @@
                         <div class="footer-copyright">
                             © 2025 AutoPrüfer Pro GmbH. Alle Rechte vorbehalten.
                         </div>
+                        <div class="payment-methods">
+                            <i class="fab fa-cc-visa" data-tooltip="Visa"></i>
+                            <i class="fab fa-cc-mastercard" data-tooltip="Mastercard"></i>
+                            <i class="fab fa-apple-pay" data-tooltip="Apple Pay"></i>
+                            <i class="fab fa-google-pay" data-tooltip="Google Pay"></i>
+                            <img src="/img/sepa-logo.svg" alt="SEPA" data-tooltip="SEPA Lastschrift">
+                            <img src="/img/sofort-logo.svg" alt="Sofort" data-tooltip="Sofort Überweisung">
+                        </div>
                     </div>
                 </footer>
             </main>
@@ -136,16 +243,34 @@
         <!-- Step 2: Plan Selection Screen -->
         <div id="planScreen" class="screen">
             <header class="app-header glass-morphism with-back">
-                <button class="back-btn glass-button" onclick="showScreen('uploadScreen')">
+                <button class="back-btn glass-button interactive" onclick="showScreen('uploadScreen')">
                     <i class="fas fa-arrow-left"></i>
                 </button>
                 <h2>Analyseumfang wählen</h2>
+                <div class="header-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 50%"></div>
+                    </div>
+                </div>
             </header>
             
             <main class="app-main">
+                <!-- Promo Code Section -->
+                <div class="promo-section glass-morphism animate-on-scroll">
+                    <h3><i class="fas fa-tag"></i> Haben Sie einen Promo-Code?</h3>
+                    <div class="promo-input-wrapper">
+                        <input type="text" id="promoCodeInput" placeholder="Code eingeben" class="glass-input" maxlength="20">
+                        <div id="promoStatus" class="promo-status"></div>
+                    </div>
+                    <div class="promo-hints">
+                        <span class="hint">FIRSTTIME - 20% Rabatt</span>
+                        <span class="hint">PREMIUM50 - 50% auf Premium</span>
+                    </div>
+                </div>
+                
                 <div class="plans-container">
                     <!-- Basic Plan -->
-                    <div class="plan-card glass-morphism hover-lift" onclick="selectPlan('basic')">
+                    <div class="plan-card glass-morphism hover-lift animate-on-scroll" data-plan="basic">
                         <div class="plan-header">
                             <h3>Basis-Check</h3>
                             <div class="plan-price">
@@ -154,19 +279,34 @@
                             </div>
                         </div>
                         <ul class="plan-features">
-                            <li><i class="fas fa-check"></i> Schnelle KI-Analyse</li>
-                            <li><i class="fas fa-check"></i> Risikobewertung</li>
-                            <li><i class="fas fa-check"></i> Preisverhandlungstipps</li>
-                            <li><i class="fas fa-check"></i> Kaufempfehlung</li>
+                            <li class="animate-on-scroll">
+                                <i class="fas fa-check"></i> 
+                                <span>Schnelle KI-Analyse</span>
+                            </li>
+                            <li class="animate-on-scroll">
+                                <i class="fas fa-check"></i> 
+                                <span>Risikobewertung</span>
+                            </li>
+                            <li class="animate-on-scroll">
+                                <i class="fas fa-check"></i> 
+                                <span>Preisverhandlungstipps</span>
+                            </li>
+                            <li class="animate-on-scroll">
+                                <i class="fas fa-check"></i> 
+                                <span>Kaufempfehlung</span>
+                            </li>
                         </ul>
-                        <button class="btn-glass btn-select">
+                        <button class="btn btn-glass btn-select interactive" onclick="selectPlan('basic')">
                             Basis wählen
                         </button>
                     </div>
                     
                     <!-- Premium Plan -->
-                    <div class="plan-card premium glass-morphism hover-lift">
-                        <div class="plan-badge pulse">Beliebteste Wahl</div>
+                    <div class="plan-card premium glass-morphism hover-lift animate-on-scroll" data-plan="premium">
+                        <div class="plan-badge pulse">
+                            <i class="fas fa-crown"></i> Beliebteste Wahl
+                        </div>
+                        <div class="plan-glow"></div>
                         <div class="plan-header">
                             <h3>Premium-Analyse</h3>
                             <div class="plan-price">
@@ -175,16 +315,60 @@
                             </div>
                         </div>
                         <ul class="plan-features">
-                            <li><i class="fas fa-check"></i> Alles aus Basis-Check</li>
-                            <li><i class="fas fa-check"></i> 40+ Analyseparameter</li>
-                            <li><i class="fas fa-star"></i> <strong>Vergleich mit 3 Alternativen</strong></li>
-                            <li><i class="fas fa-chart-line"></i> Interaktive Grafiken</li>
-                            <li><i class="fas fa-calculator"></i> Unterhaltskosten-Prognose</li>
-                            <li><i class="fas fa-comments"></i> Chat-Beratung (10 Fragen)</li>
+                            <li class="animate-on-scroll">
+                                <i class="fas fa-check"></i> 
+                                <span>Alles aus Basis-Check</span>
+                            </li>
+                            <li class="animate-on-scroll">
+                                <i class="fas fa-star"></i> 
+                                <strong>40+ Analyseparameter</strong>
+                            </li>
+                            <li class="animate-on-scroll">
+                                <i class="fas fa-star"></i> 
+                                <strong>Vergleich mit 3 Alternativen</strong>
+                            </li>
+                            <li class="animate-on-scroll">
+                                <i class="fas fa-chart-line"></i> 
+                                <span>Interaktive Grafiken</span>
+                            </li>
+                            <li class="animate-on-scroll">
+                                <i class="fas fa-calculator"></i> 
+                                <span>Unterhaltskosten-Prognose</span>
+                            </li>
+                            <li class="animate-on-scroll">
+                                <i class="fas fa-comments"></i> 
+                                <span>Chat-Beratung (10 Fragen)</span>
+                            </li>
+                            <li class="animate-on-scroll">
+                                <i class="fas fa-file-pdf"></i> 
+                                <span>Premium PDF-Bericht</span>
+                            </li>
                         </ul>
-                        <button class="btn-primary btn-select glow-effect" onclick="selectPlan('premium')">
+                        <button class="btn btn-primary btn-select glow-effect interactive" onclick="selectPlan('premium')">
                             Premium wählen
+                            <div class="button-particles"></div>
                         </button>
+                        <div class="money-back-guarantee">
+                            <i class="fas fa-shield-alt"></i>
+                            30 Tage Geld-zurück-Garantie
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Testimonials -->
+                <div class="testimonials-section animate-on-scroll">
+                    <h3 class="section-title">Das sagen unsere Kunden</h3>
+                    <div class="testimonials-slider">
+                        <div class="testimonial glass-morphism">
+                            <div class="stars">★★★★★</div>
+                            <p>"Die Analyse hat mir 2.000€ beim Autokauf gespart!"</p>
+                            <cite>- Michael K., BMW 320d Käufer</cite>
+                        </div>
+                        <div class="testimonial glass-morphism">
+                            <div class="stars">★★★★★</div>
+                            <p>"Professionell wie ein Gutachter, nur viel schneller"</p>
+                            <cite>- Sarah M., Audi A4 Käuferin</cite>
+                        </div>
                     </div>
                 </div>
             </main>
@@ -194,6 +378,11 @@
         <div id="analysisScreen" class="screen">
             <header class="app-header glass-morphism">
                 <h2>Analyse läuft...</h2>
+                <div class="header-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%"></div>
+                    </div>
+                </div>
             </header>
             
             <main class="app-main centered">
@@ -205,6 +394,7 @@
                         <div class="spinner-center">
                             <i class="fas fa-car"></i>
                         </div>
+                        <div class="spinner-particles"></div>
                     </div>
                     <div class="progress-text">
                         <h3 id="progressTitle">Fotos werden analysiert...</h3>
@@ -216,19 +406,30 @@
                                 <i class="fas fa-image"></i>
                             </div>
                             <span>Bilder prüfen</span>
+                            <div class="step-progress"></div>
                         </div>
                         <div class="step" id="step2">
                             <div class="step-icon">
                                 <i class="fas fa-brain"></i>
                             </div>
                             <span>KI-Analyse</span>
+                            <div class="step-progress"></div>
                         </div>
                         <div class="step" id="step3">
                             <div class="step-icon">
                                 <i class="fas fa-chart-bar"></i>
                             </div>
                             <span>Bericht erstellen</span>
+                            <div class="step-progress"></div>
                         </div>
+                    </div>
+                    
+                    <!-- Fun facts during loading -->
+                    <div class="loading-facts">
+                        <p class="fact">
+                            <i class="fas fa-lightbulb"></i>
+                            <span id="loadingFact">Wussten Sie? Unsere KI analysiert über 40 verschiedene Fahrzeugmerkmale!</span>
+                        </p>
                     </div>
                 </div>
             </main>
@@ -237,11 +438,11 @@
         <!-- Step 4: Results Screen -->
         <div id="resultsScreen" class="screen">
             <header class="app-header glass-morphism with-actions">
-                <button class="back-btn glass-button" onclick="resetApp()">
+                <button class="back-btn glass-button interactive" onclick="resetApp()">
                     <i class="fas fa-times"></i>
                 </button>
                 <h2>Analyseergebnis</h2>
-                <button class="share-btn glass-button" onclick="shareResults()">
+                <button class="share-btn glass-button interactive" onclick="shareResults()">
                     <i class="fas fa-share-alt"></i>
                 </button>
             </header>
@@ -251,12 +452,22 @@
                     <!-- Dynamic content will be inserted here -->
                 </div>
                 
+                <!-- Premium Chat Button -->
+                <div id="chatButtonContainer" class="chat-button-container hidden">
+                    <button id="chatButton" class="chat-button glass-morphism pulse">
+                        <i class="fas fa-comments"></i>
+                        <span>KI-Berater öffnen</span>
+                        <span class="chat-badge">10</span>
+                    </button>
+                </div>
+                
                 <!-- Results Footer -->
                 <div class="results-footer glass-morphism">
-                    <button class="btn-primary btn-large glow-effect" onclick="downloadReport()">
-                        <i class="fas fa-download"></i> Bericht herunterladen
+                    <button class="btn btn-primary btn-large glow-effect interactive" onclick="downloadReport()">
+                        <i class="fas fa-download"></i> Premium-Bericht
+                        <div class="button-particles"></div>
                     </button>
-                    <button class="btn-glass btn-large" onclick="resetApp()">
+                    <button class="btn btn-glass btn-large interactive" onclick="resetApp()">
                         <i class="fas fa-redo"></i> Neue Analyse
                     </button>
                 </div>
@@ -268,11 +479,20 @@
     <!-- Cookie Banner -->
     <div id="cookieBanner" class="cookie-banner glass-morphism">
         <div class="cookie-content">
-            <h4>Diese Website nutzt Cookies</h4>
-            <p>Wir verwenden Cookies, um Ihre Erfahrung zu verbessern und unsere Dienste zu optimieren.</p>
+            <div class="cookie-icon">
+                <i class="fas fa-cookie-bite"></i>
+            </div>
+            <div class="cookie-text">
+                <h4>Diese Website nutzt Cookies</h4>
+                <p>Wir verwenden Cookies, um Ihre Erfahrung zu verbessern und unsere Dienste zu optimieren.</p>
+            </div>
             <div class="cookie-actions">
-                <button class="btn-glass" onclick="openModal('cookieSettingsModal')">Einstellungen</button>
-                <button class="btn-primary" onclick="acceptAllCookies()">Alle akzeptieren</button>
+                <button class="btn btn-glass" onclick="openModal('cookieSettingsModal')">
+                    <i class="fas fa-cog"></i> Einstellungen
+                </button>
+                <button class="btn btn-primary" onclick="acceptAllCookies()">
+                    <i class="fas fa-check"></i> Alle akzeptieren
+                </button>
             </div>
         </div>
     </div>
@@ -313,12 +533,6 @@
                 
                 <h5>Umsatzsteuer-ID:</h5>
                 <p>USt-IdNr.: DE123456789</p>
-                
-                <h5>Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</h5>
-                <p>Max Mustermann<br>
-                    Musterstraße 123<br>
-                    30159 Hannover
-                </p>
             </div>
         </div>
     </div>
@@ -335,48 +549,16 @@
             </div>
             <div class="modal-body">
                 <h4>1. Datenschutz auf einen Blick</h4>
-                <h5>Allgemeine Hinweise</h5>
                 <p>Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese Website besuchen.</p>
                 
-                <h5>Datenerfassung auf dieser Website</h5>
-                <p><strong>Wer ist verantwortlich für die Datenerfassung auf dieser Website?</strong><br>
-                Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten können Sie dem Impressum dieser Website entnehmen.</p>
+                <h4>2. Datenerfassung auf dieser Website</h4>
+                <p>Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten können Sie dem Impressum dieser Website entnehmen.</p>
                 
-                <p><strong>Wie erfassen wir Ihre Daten?</strong><br>
-                Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese mitteilen. Hierbei kann es sich z.B. um Daten handeln, die Sie bei der Fahrzeuganalyse hochladen.</p>
-                
-                <h4>2. Hosting</h4>
-                <p>Die Inhalte unserer Website werden bei folgendem Anbieter gehostet:</p>
-                <h5>Externes Hosting</h5>
-                <p>Diese Website wird extern gehostet. Die personenbezogenen Daten, die auf dieser Website erfasst werden, werden auf den Servern des Hosters gespeichert.</p>
-                
-                <h4>3. Allgemeine Hinweise und Pflichtinformationen</h4>
-                <h5>Datenschutz</h5>
-                <p>Die Betreiber dieser Seiten nehmen den Schutz Ihrer persönlichen Daten sehr ernst. Wir behandeln Ihre personenbezogenen Daten vertraulich und entsprechend der gesetzlichen Datenschutzvorschriften sowie dieser Datenschutzerklärung.</p>
-                
-                <h5>Hinweis zur verantwortlichen Stelle</h5>
-                <p>Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:</p>
-                <p>
-                    AutoPrüfer Pro GmbH<br>
-                    Max Mustermann<br>
-                    Musterstraße 123<br>
-                    30159 Hannover<br>
-                    Telefon: +49 (0) 511 123456<br>
-                    E-Mail: datenschutz@autopruefer-pro.de
-                </p>
-                
-                <h5>Widerruf Ihrer Einwilligung zur Datenverarbeitung</h5>
-                <p>Viele Datenverarbeitungsvorgänge sind nur mit Ihrer ausdrücklichen Einwilligung möglich. Sie können eine bereits erteilte Einwilligung jederzeit widerrufen.</p>
-                
-                <h5>Beschwerderecht bei der zuständigen Aufsichtsbehörde</h5>
-                <p>Im Falle von Verstößen gegen die DSGVO steht den Betroffenen ein Beschwerderecht bei einer Aufsichtsbehörde zu.</p>
-                
-                <h4>4. Datenerfassung auf dieser Website</h4>
-                <h5>Cookies</h5>
-                <p>Unsere Internetseiten verwenden so genannte „Cookies". Cookies sind kleine Textdateien und richten auf Ihrem Endgerät keinen Schaden an.</p>
-                
-                <h5>Analyse der Fahrzeugbilder</h5>
+                <h4>3. Analyse der Fahrzeugbilder</h4>
                 <p>Die von Ihnen hochgeladenen Fahrzeugbilder werden ausschließlich für die Analyse verwendet und nach Abschluss der Analyse automatisch gelöscht. Eine dauerhafte Speicherung erfolgt nicht.</p>
+                
+                <h4>4. Ihre Rechte</h4>
+                <p>Sie haben jederzeit das Recht auf Auskunft, Berichtigung, Löschung und Widerspruch. Kontaktieren Sie uns unter datenschutz@autopruefer-pro.de.</p>
             </div>
         </div>
     </div>
@@ -393,38 +575,16 @@
             </div>
             <div class="modal-body">
                 <h4>§ 1 Geltungsbereich</h4>
-                <p>(1) Diese Allgemeinen Geschäftsbedingungen (nachfolgend "AGB") gelten für alle über unsere Website www.autopruefer-pro.de geschlossenen Verträge zwischen uns, der AutoPrüfer Pro GmbH, und Ihnen als unseren Kunden.</p>
+                <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle über unsere Website geschlossenen Verträge.</p>
                 
                 <h4>§ 2 Vertragsgegenstand</h4>
-                <p>(1) Gegenstand des Vertrags ist die Erbringung einer KI-gestützten Fahrzeuganalyse auf Basis der vom Kunden zur Verfügung gestellten Bilder und/oder Links.</p>
-                <p>(2) Die Analyse stellt eine Einschätzung dar und ersetzt keine professionelle Fahrzeugprüfung vor Ort.</p>
+                <p>Gegenstand des Vertrags ist die Erbringung einer KI-gestützten Fahrzeuganalyse.</p>
                 
-                <h4>§ 3 Vertragsschluss</h4>
-                <p>(1) Die Darstellung der Leistungen auf unserer Website stellt kein rechtlich bindendes Angebot, sondern eine Aufforderung zur Bestellung dar.</p>
-                <p>(2) Durch Klicken des Buttons "Kostenpflichtig bestellen" geben Sie eine verbindliche Bestellung ab.</p>
+                <h4>§ 3 Preise und Zahlung</h4>
+                <p>Es gelten die zum Zeitpunkt der Bestellung angegebenen Preise inklusive der gesetzlichen Mehrwertsteuer.</p>
                 
-                <h4>§ 4 Preise und Zahlung</h4>
-                <p>(1) Es gelten die zum Zeitpunkt der Bestellung angegebenen Preise.</p>
-                <p>(2) Die Zahlung erfolgt über die angebotenen Zahlungsmethoden.</p>
-                
-                <h4>§ 5 Leistungserbringung</h4>
-                <p>(1) Die Analyse wird innerhalb von 60 Sekunden nach erfolgreicher Zahlung durchgeführt.</p>
-                <p>(2) Das Ergebnis wird Ihnen online zur Verfügung gestellt.</p>
-                
-                <h4>§ 6 Widerrufsrecht</h4>
-                <p>(1) Verbrauchern steht ein Widerrufsrecht nach Maßgabe der gesetzlichen Bestimmungen zu.</p>
-                <p>(2) Das Widerrufsrecht erlischt vorzeitig, wenn wir mit der Ausführung der Dienstleistung mit Ihrer ausdrücklichen Zustimmung begonnen haben.</p>
-                
-                <h4>§ 7 Haftung</h4>
-                <p>(1) Wir haften unbeschränkt für Vorsatz und grobe Fahrlässigkeit.</p>
-                <p>(2) Bei leichter Fahrlässigkeit haften wir nur bei Verletzung wesentlicher Vertragspflichten.</p>
-                
-                <h4>§ 8 Datenschutz</h4>
-                <p>Die Verarbeitung personenbezogener Daten erfolgt gemäß unserer Datenschutzerklärung.</p>
-                
-                <h4>§ 9 Schlussbestimmungen</h4>
-                <p>(1) Es gilt das Recht der Bundesrepublik Deutschland.</p>
-                <p>(2) Gerichtsstand ist Hannover, sofern der Kunde Kaufmann ist.</p>
+                <h4>§ 4 Widerrufsrecht</h4>
+                <p>Verbrauchern steht ein Widerrufsrecht nach Maßgabe der gesetzlichen Bestimmungen zu.</p>
             </div>
         </div>
     </div>
@@ -487,8 +647,12 @@
                 </div>
                 
                 <div class="cookie-actions">
-                    <button class="btn-glass" onclick="saveSelectedCookies()">Auswahl speichern</button>
-                    <button class="btn-primary" onclick="acceptAllCookies()">Alle akzeptieren</button>
+                    <button class="btn btn-glass" onclick="saveSelectedCookies()">
+                        <i class="fas fa-save"></i> Auswahl speichern
+                    </button>
+                    <button class="btn btn-primary" onclick="acceptAllCookies()">
+                        <i class="fas fa-check"></i> Alle akzeptieren
+                    </button>
                 </div>
             </div>
         </div>
@@ -497,10 +661,109 @@
     <!-- Toast Notifications -->
     <div id="toast" class="toast glass-morphism"></div>
     
+    <!-- Tooltip Container -->
+    <div id="tooltip" class="tooltip"></div>
+    
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.6.2/countUp.umd.min.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
     <script src="/js/app.js"></script>
+    
+    <!-- Particle Animation Script -->
+    <script>
+        // Premium particle animation
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const particles = [];
+        const particleCount = 50;
+        
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.opacity = Math.random() * 0.5 + 0.5;
+            }
+            
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+            }
+            
+            draw() {
+                ctx.fillStyle = `rgba(59, 130, 246, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+        
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            requestAnimationFrame(animateParticles);
+        }
+        
+        animateParticles();
+        
+        // Resize handler
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+        
+        // Counter animation
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px'
+        };
+        
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.classList.contains('counted')) {
+                    const counter = entry.target.querySelector('.stat-number');
+                    const target = parseFloat(counter.dataset.count);
+                    const decimal = parseInt(counter.dataset.decimal) || 0;
+                    
+                    const countUp = new countUp.CountUp(counter, target, {
+                        duration: 2,
+                        separator: '.',
+                        decimal: ',',
+                        decimalPlaces: decimal
+                    });
+                    
+                    if (!countUp.error) {
+                        countUp.start();
+                        entry.target.classList.add('counted');
+                    }
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.animate-counter').forEach(el => {
+            counterObserver.observe(el);
+        });
+    </script>
 </body>
 </html>
