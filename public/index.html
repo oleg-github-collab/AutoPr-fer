@@ -7,26 +7,1387 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="description" content="AutoPrüfer Pro - Professionelle KI-gestützte Fahrzeuganalyse in 30 Sekunden. Vertrauenswürdige Bewertungen für Gebrauchtwagen mit Premium-Technologie.">
-    <meta name="keywords" content="Fahrzeuganalyse, KI, Gebrauchtwagen, Auto kaufen, Fahrzeugbewertung, BMW, Mercedes, Audi, VW">
     
     <title>AutoPrüfer Pro - KI Fahrzeuganalyse | Premium Auto-Check</title>
-    
-    <!-- PWA -->
-    <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/logo-192.png">
-    <link rel="icon" type="image/png" href="/favicon.png">
     
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://js.stripe.com">
     
     <!-- Fonts & Icons -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Styles -->
-    <link rel="stylesheet" href="/css/app.css">
+    <style>
+/* Divine Design System - AutoPrüfer Pro */
+
+:root {
+    /* Premium Color Palette */
+    --primary: #0066ff;
+    --primary-rgb: 0, 102, 255;
+    --primary-dark: #0052cc;
+    --primary-light: #3385ff;
+    --primary-glow: rgba(0, 102, 255, 0.3);
+    
+    --secondary: #ff6600;
+    --secondary-rgb: 255, 102, 0;
+    --secondary-dark: #cc5200;
+    --secondary-light: #ff8533;
+    
+    --accent: #00d4aa;
+    --accent-rgb: 0, 212, 170;
+    --accent-dark: #00a888;
+    --accent-light: #33ddbb;
+    
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+    
+    /* Luxury Dark Theme */
+    --dark: #050813;
+    --dark-rgb: 5, 8, 19;
+    --dark-gradient: linear-gradient(180deg, #050813 0%, #0a0f1f 50%, #0f1629 100%);
+    --dark-radial: radial-gradient(ellipse at top, #0a0f1f 0%, #050813 100%);
+    
+    --surface-1: rgba(255, 255, 255, 0.02);
+    --surface-2: rgba(255, 255, 255, 0.04);
+    --surface-3: rgba(255, 255, 255, 0.06);
+    --surface-4: rgba(255, 255, 255, 0.08);
+    
+    /* Advanced Glassmorphism */
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-hover: rgba(255, 255, 255, 0.05);
+    --glass-active: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-light: rgba(255, 255, 255, 0.12);
+    
+    /* Shadows & Effects */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.16);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.24);
+    --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.32);
+    --shadow-2xl: 0 24px 64px rgba(0, 0, 0, 0.48);
+    --shadow-glow: 0 0 48px var(--primary-glow);
+    
+    /* Layout */
+    --header-height: 80px;
+    --mobile-header-height: 64px;
+    --spacing-unit: 8px;
+    --container-width: 1280px;
+    --content-width: 1024px;
+    
+    /* Animations */
+    --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-in-out-circ: cubic-bezier(0.85, 0, 0.15, 1);
+    --spring: cubic-bezier(0.43, 0.195, 0.02, 1.3);
+}
+
+/* Reset & Base */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+    background: var(--dark);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Animated Background */
+.animated-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: var(--dark-gradient);
+    overflow: hidden;
+}
+
+.animated-bg::before {
+    content: '';
+    position: absolute;
+    inset: -50%;
+    background-image: 
+        radial-gradient(circle at 20% 80%, rgba(var(--primary-rgb), 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(var(--secondary-rgb), 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(var(--accent-rgb), 0.06) 0%, transparent 50%);
+    animation: cosmic-drift 60s ease-in-out infinite;
+}
+
+.gradient-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0;
+    animation: orb-float 30s ease-in-out infinite;
+}
+
+.orb-1 {
+    width: min(80vw, 800px);
+    height: min(80vw, 800px);
+    background: radial-gradient(circle, rgba(var(--primary-rgb), 0.4) 0%, transparent 70%);
+    top: -40%;
+    left: -20%;
+    animation-delay: 0s;
+}
+
+.orb-2 {
+    width: min(60vw, 600px);
+    height: min(60vw, 600px);
+    background: radial-gradient(circle, rgba(var(--secondary-rgb), 0.3) 0%, transparent 70%);
+    bottom: -30%;
+    right: -15%;
+    animation-delay: -10s;
+}
+
+.orb-3 {
+    width: min(50vw, 500px);
+    height: min(50vw, 500px);
+    background: radial-gradient(circle, rgba(var(--accent-rgb), 0.35) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation-delay: -20s;
+}
+
+@keyframes cosmic-drift {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    33% { transform: rotate(120deg) scale(1.1); }
+    66% { transform: rotate(240deg) scale(0.9); }
+}
+
+@keyframes orb-float {
+    0%, 100% { 
+        opacity: 0.3;
+        transform: translate(0, 0) scale(1);
+    }
+    25% { 
+        opacity: 0.5;
+        transform: translate(10%, -10%) scale(1.1);
+    }
+    50% { 
+        opacity: 0.4;
+        transform: translate(-5%, 15%) scale(0.95);
+    }
+    75% { 
+        opacity: 0.6;
+        transform: translate(-15%, -5%) scale(1.05);
+    }
+}
+
+/* App Container */
+.app-container {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+}
+
+/* Screens */
+.screen {
+    display: none;
+    min-height: 100vh;
+    animation: screen-enter 0.5s var(--ease-out-expo);
+}
+
+.screen.active {
+    display: block;
+}
+
+@keyframes screen-enter {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Glass Morphism */
+.glass-morphism {
+    background: var(--glass);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid var(--glass-border);
+    position: relative;
+}
+
+.glass-morphism::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.1) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+/* Header */
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 1.5rem 2rem;
+    margin-bottom: 2rem;
+}
+
+.header-content {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.logo-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-icon {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+    box-shadow: 0 8px 24px rgba(var(--primary-rgb), 0.3);
+}
+
+.logo-text h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.75rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin: 0;
+}
+
+.header-subtitle {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.trust-badges {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0.5rem 1rem;
+    background: var(--surface-2);
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+}
+
+/* Main Content */
+.app-main {
+    padding: 0 2rem 2rem;
+    max-width: var(--container-width);
+    margin: 0 auto;
+}
+
+/* Hero Section */
+.hero-section {
+    padding: 3rem;
+    border-radius: 32px;
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    font-size: 0.875rem;
+    font-weight: 600;
+    border-radius: 24px;
+    margin-bottom: 1.5rem;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.hero-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 2rem;
+}
+
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Vehicle Type Section */
+.vehicle-type-section {
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.optional-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--surface-3);
+    border-radius: 12px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.vehicle-type-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.vehicle-type-option {
+    padding: 1.5rem;
+    border-radius: 16px;
+    background: var(--surface-2);
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out-expo);
+    text-align: center;
+}
+
+.vehicle-type-option i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--primary);
+}
+
+.vehicle-type-option span {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.vehicle-type-option small {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.vehicle-type-option:hover {
+    transform: translateY(-2px);
+    background: var(--surface-3);
+    border-color: var(--primary);
+}
+
+.vehicle-type-option.selected {
+    background: rgba(var(--primary-rgb), 0.1);
+    border-color: var(--primary);
+}
+
+/* Upload Section */
+.upload-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.upload-card {
+    padding: 3rem;
+    border-radius: 24px;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s var(--ease-out-expo);
+}
+
+.upload-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.upload-card.drag-over {
+    border-color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.1);
+}
+
+.upload-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    border-radius: 24px;
+    background: var(--surface-3);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.upload-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.upload-card p {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 1.5rem;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s var(--ease-out-expo);
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    color: white;
+    box-shadow: 
+        0 4px 24px rgba(var(--primary-rgb), 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 8px 32px rgba(var(--primary-rgb), 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-glass {
+    background: var(--glass);
+    color: rgba(255, 255, 255, 0.9);
+    border: 1px solid var(--glass-border);
+}
+
+.btn-glass:hover {
+    background: var(--glass-hover);
+    border-color: var(--glass-border-light);
+}
+
+.btn-large {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Input Styles */
+.glass-input {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.glass-input:focus {
+    outline: none;
+    background: rgba(0, 0, 0, 0.5);
+    border-color: var(--primary);
+    box-shadow: 
+        0 0 0 3px rgba(var(--primary-rgb), 0.1),
+        inset 0 0 0 1px rgba(var(--primary-rgb), 0.2);
+}
+
+.glass-input::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.glass-input.error {
+    border-color: var(--danger);
+}
+
+.glass-input.success {
+    border-color: var(--success);
+}
+
+/* URL Input Wrapper */
+.url-input-wrapper {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.url-status {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Supported Sites */
+.supported-sites {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.supported-sites img {
+    height: 24px;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
+
+.supported-sites img:hover {
+    opacity: 1;
+}
+
+/* Files Preview */
+.files-preview {
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+}
+
+.files-preview.hidden {
+    display: none;
+}
+
+.files-preview h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.files-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: var(--surface-2);
+    border-radius: 12px;
+    position: relative;
+}
+
+.file-preview {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.file-info {
+    flex: 1;
+}
+
+.file-name {
+    font-weight: 500;
+    display: block;
+}
+
+.file-size {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.file-remove {
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.file-remove:hover {
+    color: var(--danger);
+}
+
+/* Bottom Bar */
+.bottom-bar {
+    position: sticky;
+    bottom: 0;
+    padding: 1.5rem;
+    margin-top: 3rem;
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--glass-border);
+}
+
+.action-content {
+    max-width: var(--content-width);
+    margin: 0 auto;
+    text-align: center;
+}
+
+.secure-badge {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Features Section */
+.features-section {
+    margin-top: 4rem;
+    padding-top: 4rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.feature-card {
+    padding: 2rem;
+    border-radius: 20px;
+    text-align: center;
+    transition: all 0.3s var(--ease-out-expo);
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    background: var(--surface-2);
+}
+
+.feature-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1) 0%, rgba(var(--accent-rgb), 0.1) 100%);
+    color: var(--primary);
+}
+
+.feature-card h4 {
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+}
+
+.feature-card p {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* Plan Cards */
+.plans-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.plan-card {
+    padding: 2.5rem;
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.4s var(--ease-out-expo);
+}
+
+.plan-card:hover {
+    transform: translateY(-8px);
+}
+
+.plan-card.premium {
+    background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.1) 0%, rgba(var(--secondary-rgb), 0.05) 100%);
+    border: 2px solid rgba(var(--primary-rgb), 0.3);
+}
+
+.plan-badge {
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0 0 16px 16px;
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    box-shadow: 0 4px 20px rgba(var(--primary-rgb), 0.3);
+}
+
+.plan-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.plan-header h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.plan-price {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.25rem;
+}
+
+.currency {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.amount {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.plan-features {
+    list-style: none;
+    margin-bottom: 2rem;
+}
+
+.plan-features li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.plan-features li:last-child {
+    border-bottom: none;
+}
+
+.plan-features i {
+    color: var(--success);
+}
+
+/* Progress Spinner */
+.analysis-progress {
+    text-align: center;
+    padding: 3rem;
+}
+
+.progress-spinner {
+    width: 140px;
+    height: 140px;
+    position: relative;
+    margin: 0 auto 3rem;
+}
+
+.spinner-ring {
+    position: absolute;
+    inset: 0;
+    border: 3px solid transparent;
+    border-radius: 50%;
+    animation: spin 2s linear infinite;
+}
+
+.spinner-ring:nth-child(1) {
+    border-top-color: var(--primary);
+    animation-duration: 3s;
+}
+
+.spinner-ring:nth-child(2) {
+    inset: 15px;
+    border-right-color: var(--secondary);
+    animation-duration: 4s;
+    animation-direction: reverse;
+}
+
+.spinner-ring:nth-child(3) {
+    inset: 30px;
+    border-bottom-color: var(--accent);
+    animation-duration: 5s;
+}
+
+.spinner-center {
+    position: absolute;
+    inset: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: var(--primary);
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Progress Steps */
+.progress-steps {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.step {
+    text-align: center;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.step.active {
+    opacity: 1;
+}
+
+.step.completed {
+    opacity: 1;
+}
+
+.step-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    border-radius: 50%;
+    background: var(--surface-3);
+    position: relative;
+}
+
+.step.active .step-icon {
+    background: rgba(var(--primary-rgb), 0.2);
+    color: var(--primary);
+}
+
+.step.completed .step-icon {
+    background: var(--success);
+    color: white;
+}
+
+.step.completed .step-icon::after {
+    content: '✓';
+    position: absolute;
+    font-size: 16px;
+}
+
+/* Toast */
+.toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s var(--ease-out-expo);
+    z-index: 1000;
+}
+
+.toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.toast.success {
+    background: var(--success);
+}
+
+.toast.error {
+    background: var(--danger);
+}
+
+.toast.warning {
+    background: var(--warning);
+}
+
+.toast.info {
+    background: var(--info);
+}
+
+/* Cookie Banner */
+.cookie-banner {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    right: 0;
+    padding: 2rem;
+    transition: bottom 0.5s var(--ease-out-expo);
+    z-index: 999;
+}
+
+.cookie-banner.show {
+    bottom: 0;
+}
+
+.cookie-content {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.cookie-icon {
+    font-size: 3rem;
+    color: var(--secondary);
+}
+
+.cookie-text {
+    flex: 1;
+}
+
+.cookie-text h4 {
+    margin-bottom: 0.5rem;
+}
+
+.cookie-text p {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.cookie-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.modal-content {
+    position: relative;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 2rem;
+    border-radius: 24px;
+    animation: modal-enter 0.4s var(--ease-out-back);
+}
+
+@keyframes modal-enter {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h3 {
+    font-size: 1.5rem;
+}
+
+.modal-close {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface-3);
+    border: none;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+    background: var(--surface-4);
+    color: white;
+}
+
+/* Footer */
+.app-footer {
+    margin-top: 4rem;
+    padding: 3rem 0;
+    border-top: 1px solid var(--glass-border);
+}
+
+.footer-content {
+    text-align: center;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.footer-links a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: var(--primary);
+}
+
+.footer-copyright {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 1rem;
+}
+
+.payment-methods {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.payment-methods i,
+.payment-methods img {
+    transition: all 0.3s ease;
+}
+
+.payment-methods i:hover,
+.payment-methods img:hover {
+    color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    :root {
+        --header-height: var(--mobile-header-height);
+    }
+    
+    .app-header {
+        padding: 1rem;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .logo-icon {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+    }
+    
+    .logo-text h1 {
+        font-size: 1.5rem;
+    }
+    
+    .trust-badges {
+        justify-content: center;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.75rem;
+    }
+    
+    .app-main {
+        padding: 0 1rem 1rem;
+    }
+    
+    .hero-section {
+        padding: 2rem;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .hero-stats {
+        gap: 2rem;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+    
+    .vehicle-type-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .upload-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .upload-card {
+        padding: 2rem;
+    }
+    
+    .features-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .plans-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .plan-card {
+        padding: 2rem;
+    }
+    
+    .progress-steps {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .cookie-content {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .cookie-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .cookie-actions .btn {
+        width: 100%;
+    }
+    
+    .modal-content {
+        padding: 1.5rem;
+    }
+    
+    .footer-links {
+        gap: 1rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Performance Optimizations */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Tooltip */
+.tooltip {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 1000;
+}
+
+.tooltip.show {
+    opacity: 1;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, var(--primary), var(--accent));
+    border-radius: 6px;
+    border: 2px solid var(--dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, var(--primary-light), var(--accent-light));
+}
+
+/* Loading States */
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        var(--surface-2) 0%,
+        var(--surface-3) 50%,
+        var(--surface-2) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Print Styles */
+@media print {
+    .animated-bg,
+    .app-header,
+    .bottom-bar,
+    .cookie-banner,
+    .modal,
+    .toast {
+        display: none !important;
+    }
+    
+    body {
+        background: white;
+        color: black;
+    }
+}
+    </style>
 </head>
 <body>
     <!-- Premium Animated Background -->
@@ -44,7 +1405,7 @@
         <div id="uploadScreen" class="screen active">
             <header class="app-header glass-morphism">
                 <div class="header-content">
-                    <div class="logo-wrapper animate-on-scroll">
+                    <div class="logo-wrapper">
                         <div class="logo-icon">
                             <i class="fas fa-shield-alt"></i>
                         </div>
@@ -53,7 +1414,7 @@
                             <div class="header-subtitle">KI-Analyse in 30 Sekunden</div>
                         </div>
                     </div>
-                    <div class="trust-badges animate-on-scroll">
+                    <div class="trust-badges">
                         <span class="badge" data-tooltip="TÜV-geprüfte Analysemethoden">
                             <i class="fas fa-check-circle"></i> TÜV geprüft
                         </span>
@@ -69,28 +1430,28 @@
             
             <main class="app-main">
                 <!-- Hero Section -->
-                <div class="hero-section glass-morphism animate-on-scroll parallax" data-speed="0.5">
+                <div class="hero-section glass-morphism">
                     <div class="hero-badge">NEU: Premium-Analyse mit KI 4.0</div>
                     <h2 class="hero-title">Ihr Auto-Experte in der Tasche</h2>
                     <p class="hero-subtitle">Professionelle Fahrzeuganalyse mit modernster KI-Technologie</p>
                     <div class="hero-stats">
-                        <div class="stat animate-counter">
-                            <span class="stat-number" data-count="50000">0</span>
+                        <div class="stat">
+                            <span class="stat-number">50.000+</span>
                             <span class="stat-label">Analysen</span>
                         </div>
-                        <div class="stat animate-counter">
-                            <span class="stat-number" data-count="98">0</span>%
+                        <div class="stat">
+                            <span class="stat-number">98%</span>
                             <span class="stat-label">Genauigkeit</span>
                         </div>
-                        <div class="stat animate-counter">
-                            <span class="stat-number" data-count="4.9" data-decimal="1">0</span>★
+                        <div class="stat">
+                            <span class="stat-number">4.9★</span>
                             <span class="stat-label">Bewertung</span>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Vehicle Type Selector -->
-                <div class="vehicle-type-section animate-on-scroll">
+                <div class="vehicle-type-section">
                     <h3 class="section-title">
                         <i class="fas fa-car"></i> 
                         Fahrzeugtyp wählen <span class="optional-badge">Optional</span>
@@ -120,13 +1481,12 @@
                 </div>
                 
                 <!-- Upload Options -->
-                <div class="upload-container animate-on-scroll">
+                <div class="upload-container">
                     <!-- Photo Upload Card -->
-                    <div class="upload-card glass-morphism hover-lift interactive" id="photoUploadCard">
+                    <div class="upload-card glass-morphism" id="photoUploadCard">
                         <input type="file" id="photoInput" accept="image/*" multiple hidden>
-                        <div class="upload-icon glass-icon">
+                        <div class="upload-icon">
                             <i class="fas fa-camera"></i>
-                            <div class="ripple"></div>
                         </div>
                         <h3>Fotos hochladen</h3>
                         <p>Ziehen Sie Fotos hierher oder klicken Sie</p>
@@ -140,10 +1500,9 @@
                     </div>
                     
                     <!-- URL Input Card -->
-                    <div class="upload-card glass-morphism hover-lift interactive">
-                        <div class="upload-icon glass-icon">
+                    <div class="upload-card glass-morphism">
+                        <div class="upload-icon">
                             <i class="fas fa-link"></i>
-                            <div class="ripple"></div>
                         </div>
                         <h3>Link zum Inserat</h3>
                         <p>Mobile.de, AutoScout24, eBay Kleinanzeigen</p>
@@ -152,15 +1511,15 @@
                             <div class="url-status"></div>
                         </div>
                         <div class="supported-sites">
-                            <img src="/img/mobile-de-logo.svg" alt="Mobile.de" data-tooltip="Mobile.de">
-                            <img src="/img/autoscout24-logo.svg" alt="AutoScout24" data-tooltip="AutoScout24">
-                            <img src="/img/ebay-kleinanzeigen-logo.svg" alt="eBay Kleinanzeigen" data-tooltip="eBay Kleinanzeigen">
+                            <span title="Mobile.de">📱</span>
+                            <span title="AutoScout24">🚗</span>
+                            <span title="eBay Kleinanzeigen">🛒</span>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Selected Files Preview -->
-                <div id="filesPreview" class="files-preview glass-morphism hidden animate-on-scroll">
+                <div id="filesPreview" class="files-preview glass-morphism hidden">
                     <h4><i class="fas fa-images"></i> Ausgewählte Dateien</h4>
                     <div id="filesList" class="files-list"></div>
                 </div>
@@ -168,10 +1527,9 @@
                 <!-- Bottom Action Bar -->
                 <div class="bottom-bar glass-morphism">
                     <div class="action-content">
-                        <button id="analyzeBtn" class="btn btn-primary btn-large glow-effect interactive" disabled>
+                        <button id="analyzeBtn" class="btn btn-primary btn-large" disabled>
                             <i class="fas fa-search"></i>
                             <span>Analyse starten</span>
-                            <div class="button-particles"></div>
                         </button>
                         <div class="secure-badge">
                             <i class="fas fa-shield-alt"></i>
@@ -182,30 +1540,30 @@
                 
                 <!-- Features Section -->
                 <section class="features-section">
-                    <h3 class="section-title animate-on-scroll">Warum AutoPrüfer Pro?</h3>
+                    <h3 class="section-title">Warum AutoPrüfer Pro?</h3>
                     <div class="features-grid">
-                        <div class="feature-card glass-morphism animate-on-scroll">
+                        <div class="feature-card glass-morphism">
                             <div class="feature-icon">
                                 <i class="fas fa-brain"></i>
                             </div>
                             <h4>KI 4.0 Technologie</h4>
                             <p>Modernste Künstliche Intelligenz analysiert jedes Detail</p>
                         </div>
-                        <div class="feature-card glass-morphism animate-on-scroll">
+                        <div class="feature-card glass-morphism">
                             <div class="feature-icon">
                                 <i class="fas fa-clock"></i>
                             </div>
                             <h4>30 Sekunden</h4>
                             <p>Blitzschnelle Analyse in Echtzeit</p>
                         </div>
-                        <div class="feature-card glass-morphism animate-on-scroll">
+                        <div class="feature-card glass-morphism">
                             <div class="feature-icon">
                                 <i class="fas fa-chart-line"></i>
                             </div>
                             <h4>40+ Parameter</h4>
                             <p>Umfassende Bewertung aller wichtigen Aspekte</p>
                         </div>
-                        <div class="feature-card glass-morphism animate-on-scroll">
+                        <div class="feature-card glass-morphism">
                             <div class="feature-icon">
                                 <i class="fas fa-euro-sign"></i>
                             </div>
@@ -216,7 +1574,7 @@
                 </section>
                 
                 <!-- Footer -->
-                <footer class="app-footer animate-on-scroll">
+                <footer class="app-footer">
                     <div class="footer-content">
                         <div class="footer-links">
                             <a href="#" onclick="openModal('impressumModal'); return false;">Impressum</a>
@@ -232,8 +1590,8 @@
                             <i class="fab fa-cc-mastercard" data-tooltip="Mastercard"></i>
                             <i class="fab fa-apple-pay" data-tooltip="Apple Pay"></i>
                             <i class="fab fa-google-pay" data-tooltip="Google Pay"></i>
-                            <img src="/img/sepa-logo.svg" alt="SEPA" data-tooltip="SEPA Lastschrift">
-                            <img src="/img/sofort-logo.svg" alt="Sofort" data-tooltip="Sofort Überweisung">
+                            <span data-tooltip="SEPA">💳</span>
+                            <span data-tooltip="Sofort">⚡</span>
                         </div>
                     </div>
                 </footer>
@@ -242,35 +1600,17 @@
         
         <!-- Step 2: Plan Selection Screen -->
         <div id="planScreen" class="screen">
-            <header class="app-header glass-morphism with-back">
-                <button class="back-btn glass-button interactive" onclick="showScreen('uploadScreen')">
-                    <i class="fas fa-arrow-left"></i>
+            <header class="app-header glass-morphism">
+                <button class="btn btn-glass" onclick="showScreen('uploadScreen')">
+                    <i class="fas fa-arrow-left"></i> Zurück
                 </button>
                 <h2>Analyseumfang wählen</h2>
-                <div class="header-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 50%"></div>
-                    </div>
-                </div>
             </header>
             
             <main class="app-main">
-                <!-- Promo Code Section -->
-                <div class="promo-section glass-morphism animate-on-scroll">
-                    <h3><i class="fas fa-tag"></i> Haben Sie einen Promo-Code?</h3>
-                    <div class="promo-input-wrapper">
-                        <input type="text" id="promoCodeInput" placeholder="Code eingeben" class="glass-input" maxlength="20">
-                        <div id="promoStatus" class="promo-status"></div>
-                    </div>
-                    <div class="promo-hints">
-                        <span class="hint">FIRSTTIME - 20% Rabatt</span>
-                        <span class="hint">PREMIUM50 - 50% auf Premium</span>
-                    </div>
-                </div>
-                
                 <div class="plans-container">
                     <!-- Basic Plan -->
-                    <div class="plan-card glass-morphism hover-lift animate-on-scroll" data-plan="basic">
+                    <div class="plan-card glass-morphism" data-plan="basic">
                         <div class="plan-header">
                             <h3>Basis-Check</h3>
                             <div class="plan-price">
@@ -279,34 +1619,33 @@
                             </div>
                         </div>
                         <ul class="plan-features">
-                            <li class="animate-on-scroll">
+                            <li>
                                 <i class="fas fa-check"></i> 
                                 <span>Schnelle KI-Analyse</span>
                             </li>
-                            <li class="animate-on-scroll">
+                            <li>
                                 <i class="fas fa-check"></i> 
                                 <span>Risikobewertung</span>
                             </li>
-                            <li class="animate-on-scroll">
+                            <li>
                                 <i class="fas fa-check"></i> 
                                 <span>Preisverhandlungstipps</span>
                             </li>
-                            <li class="animate-on-scroll">
+                            <li>
                                 <i class="fas fa-check"></i> 
                                 <span>Kaufempfehlung</span>
                             </li>
                         </ul>
-                        <button class="btn btn-glass btn-select interactive" onclick="selectPlan('basic')">
+                        <button class="btn btn-glass" onclick="selectPlan('basic')">
                             Basis wählen
                         </button>
                     </div>
                     
                     <!-- Premium Plan -->
-                    <div class="plan-card premium glass-morphism hover-lift animate-on-scroll" data-plan="premium">
-                        <div class="plan-badge pulse">
+                    <div class="plan-card premium glass-morphism" data-plan="premium">
+                        <div class="plan-badge">
                             <i class="fas fa-crown"></i> Beliebteste Wahl
                         </div>
-                        <div class="plan-glow"></div>
                         <div class="plan-header">
                             <h3>Premium-Analyse</h3>
                             <div class="plan-price">
@@ -315,60 +1654,38 @@
                             </div>
                         </div>
                         <ul class="plan-features">
-                            <li class="animate-on-scroll">
+                            <li>
                                 <i class="fas fa-check"></i> 
                                 <span>Alles aus Basis-Check</span>
                             </li>
-                            <li class="animate-on-scroll">
+                            <li>
                                 <i class="fas fa-star"></i> 
                                 <strong>40+ Analyseparameter</strong>
                             </li>
-                            <li class="animate-on-scroll">
+                            <li>
                                 <i class="fas fa-star"></i> 
                                 <strong>Vergleich mit 3 Alternativen</strong>
                             </li>
-                            <li class="animate-on-scroll">
+                            <li>
                                 <i class="fas fa-chart-line"></i> 
                                 <span>Interaktive Grafiken</span>
                             </li>
-                            <li class="animate-on-scroll">
+                            <li>
                                 <i class="fas fa-calculator"></i> 
                                 <span>Unterhaltskosten-Prognose</span>
                             </li>
-                            <li class="animate-on-scroll">
+                            <li>
                                 <i class="fas fa-comments"></i> 
                                 <span>Chat-Beratung (10 Fragen)</span>
                             </li>
-                            <li class="animate-on-scroll">
+                            <li>
                                 <i class="fas fa-file-pdf"></i> 
                                 <span>Premium PDF-Bericht</span>
                             </li>
                         </ul>
-                        <button class="btn btn-primary btn-select glow-effect interactive" onclick="selectPlan('premium')">
+                        <button class="btn btn-primary" onclick="selectPlan('premium')">
                             Premium wählen
-                            <div class="button-particles"></div>
                         </button>
-                        <div class="money-back-guarantee">
-                            <i class="fas fa-shield-alt"></i>
-                            30 Tage Geld-zurück-Garantie
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Testimonials -->
-                <div class="testimonials-section animate-on-scroll">
-                    <h3 class="section-title">Das sagen unsere Kunden</h3>
-                    <div class="testimonials-slider">
-                        <div class="testimonial glass-morphism">
-                            <div class="stars">★★★★★</div>
-                            <p>"Die Analyse hat mir 2.000€ beim Autokauf gespart!"</p>
-                            <cite>- Michael K., BMW 320d Käufer</cite>
-                        </div>
-                        <div class="testimonial glass-morphism">
-                            <div class="stars">★★★★★</div>
-                            <p>"Professionell wie ein Gutachter, nur viel schneller"</p>
-                            <cite>- Sarah M., Audi A4 Käuferin</cite>
-                        </div>
                     </div>
                 </div>
             </main>
@@ -378,14 +1695,9 @@
         <div id="analysisScreen" class="screen">
             <header class="app-header glass-morphism">
                 <h2>Analyse läuft...</h2>
-                <div class="header-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 75%"></div>
-                    </div>
-                </div>
             </header>
             
-            <main class="app-main centered">
+            <main class="app-main">
                 <div class="analysis-progress glass-morphism">
                     <div class="progress-spinner">
                         <div class="spinner-ring"></div>
@@ -394,7 +1706,6 @@
                         <div class="spinner-center">
                             <i class="fas fa-car"></i>
                         </div>
-                        <div class="spinner-particles"></div>
                     </div>
                     <div class="progress-text">
                         <h3 id="progressTitle">Fotos werden analysiert...</h3>
@@ -406,30 +1717,19 @@
                                 <i class="fas fa-image"></i>
                             </div>
                             <span>Bilder prüfen</span>
-                            <div class="step-progress"></div>
                         </div>
                         <div class="step" id="step2">
                             <div class="step-icon">
                                 <i class="fas fa-brain"></i>
                             </div>
                             <span>KI-Analyse</span>
-                            <div class="step-progress"></div>
                         </div>
                         <div class="step" id="step3">
                             <div class="step-icon">
                                 <i class="fas fa-chart-bar"></i>
                             </div>
                             <span>Bericht erstellen</span>
-                            <div class="step-progress"></div>
                         </div>
-                    </div>
-                    
-                    <!-- Fun facts during loading -->
-                    <div class="loading-facts">
-                        <p class="fact">
-                            <i class="fas fa-lightbulb"></i>
-                            <span id="loadingFact">Wussten Sie? Unsere KI analysiert über 40 verschiedene Fahrzeugmerkmale!</span>
-                        </p>
                     </div>
                 </div>
             </main>
@@ -437,39 +1737,16 @@
         
         <!-- Step 4: Results Screen -->
         <div id="resultsScreen" class="screen">
-            <header class="app-header glass-morphism with-actions">
-                <button class="back-btn glass-button interactive" onclick="resetApp()">
-                    <i class="fas fa-times"></i>
+            <header class="app-header glass-morphism">
+                <button class="btn btn-glass" onclick="resetApp()">
+                    <i class="fas fa-times"></i> Schließen
                 </button>
                 <h2>Analyseergebnis</h2>
-                <button class="share-btn glass-button interactive" onclick="shareResults()">
-                    <i class="fas fa-share-alt"></i>
-                </button>
             </header>
             
-            <main class="app-main results-main">
+            <main class="app-main">
                 <div id="resultsContent">
-                    <!-- Dynamic content will be inserted here -->
-                </div>
-                
-                <!-- Premium Chat Button -->
-                <div id="chatButtonContainer" class="chat-button-container hidden">
-                    <button id="chatButton" class="chat-button glass-morphism pulse">
-                        <i class="fas fa-comments"></i>
-                        <span>KI-Berater öffnen</span>
-                        <span class="chat-badge">10</span>
-                    </button>
-                </div>
-                
-                <!-- Results Footer -->
-                <div class="results-footer glass-morphism">
-                    <button class="btn btn-primary btn-large glow-effect interactive" onclick="downloadReport()">
-                        <i class="fas fa-download"></i> Premium-Bericht
-                        <div class="button-particles"></div>
-                    </button>
-                    <button class="btn btn-glass btn-large interactive" onclick="resetApp()">
-                        <i class="fas fa-redo"></i> Neue Analyse
-                    </button>
+                    <!-- Results will be inserted here -->
                 </div>
             </main>
         </div>
@@ -498,7 +1775,6 @@
     </div>
     
     <!-- Modals -->
-    <!-- Impressum Modal -->
     <div id="impressumModal" class="modal">
         <div class="modal-backdrop" onclick="closeModal('impressumModal')"></div>
         <div class="modal-content glass-morphism">
@@ -515,29 +1791,14 @@
                     30159 Hannover<br>
                     Deutschland
                 </p>
-                
-                <h5>Vertreten durch:</h5>
-                <p>Max Mustermann (Geschäftsführer)</p>
-                
-                <h5>Kontakt:</h5>
                 <p>
                     Telefon: +49 (0) 511 123456<br>
                     E-Mail: info@autopruefer-pro.de
                 </p>
-                
-                <h5>Registereintrag:</h5>
-                <p>
-                    Handelsregister: HRB 123456<br>
-                    Registergericht: Amtsgericht Hannover
-                </p>
-                
-                <h5>Umsatzsteuer-ID:</h5>
-                <p>USt-IdNr.: DE123456789</p>
             </div>
         </div>
     </div>
     
-    <!-- Privacy Modal -->
     <div id="privacyModal" class="modal">
         <div class="modal-backdrop" onclick="closeModal('privacyModal')"></div>
         <div class="modal-content glass-morphism">
@@ -548,22 +1809,11 @@
                 </button>
             </div>
             <div class="modal-body">
-                <h4>1. Datenschutz auf einen Blick</h4>
-                <p>Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese Website besuchen.</p>
-                
-                <h4>2. Datenerfassung auf dieser Website</h4>
-                <p>Die Datenverarbeitung auf dieser Website erfolgt durch den Websitebetreiber. Dessen Kontaktdaten können Sie dem Impressum dieser Website entnehmen.</p>
-                
-                <h4>3. Analyse der Fahrzeugbilder</h4>
-                <p>Die von Ihnen hochgeladenen Fahrzeugbilder werden ausschließlich für die Analyse verwendet und nach Abschluss der Analyse automatisch gelöscht. Eine dauerhafte Speicherung erfolgt nicht.</p>
-                
-                <h4>4. Ihre Rechte</h4>
-                <p>Sie haben jederzeit das Recht auf Auskunft, Berichtigung, Löschung und Widerspruch. Kontaktieren Sie uns unter datenschutz@autopruefer-pro.de.</p>
+                <p>Die von Ihnen hochgeladenen Fahrzeugbilder werden ausschließlich für die Analyse verwendet und nach Abschluss der Analyse automatisch gelöscht.</p>
             </div>
         </div>
     </div>
     
-    <!-- Terms Modal -->
     <div id="termsModal" class="modal">
         <div class="modal-backdrop" onclick="closeModal('termsModal')"></div>
         <div class="modal-content glass-morphism">
@@ -574,22 +1824,11 @@
                 </button>
             </div>
             <div class="modal-body">
-                <h4>§ 1 Geltungsbereich</h4>
                 <p>Diese Allgemeinen Geschäftsbedingungen gelten für alle über unsere Website geschlossenen Verträge.</p>
-                
-                <h4>§ 2 Vertragsgegenstand</h4>
-                <p>Gegenstand des Vertrags ist die Erbringung einer KI-gestützten Fahrzeuganalyse.</p>
-                
-                <h4>§ 3 Preise und Zahlung</h4>
-                <p>Es gelten die zum Zeitpunkt der Bestellung angegebenen Preise inklusive der gesetzlichen Mehrwertsteuer.</p>
-                
-                <h4>§ 4 Widerrufsrecht</h4>
-                <p>Verbrauchern steht ein Widerrufsrecht nach Maßgabe der gesetzlichen Bestimmungen zu.</p>
             </div>
         </div>
     </div>
     
-    <!-- Cookie Settings Modal -->
     <div id="cookieSettingsModal" class="modal">
         <div class="modal-backdrop" onclick="closeModal('cookieSettingsModal')"></div>
         <div class="modal-content glass-morphism">
@@ -600,56 +1839,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>Wir verwenden Cookies, um Inhalte und Anzeigen zu personalisieren, Funktionen für soziale Medien anbieten zu können und die Zugriffe auf unsere Website zu analysieren.</p>
-                
-                <div class="cookie-category">
-                    <div class="cookie-header">
-                        <h5>Notwendige Cookies</h5>
-                        <label class="switch disabled">
-                            <input type="checkbox" checked disabled>
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <p>Diese Cookies sind für die Grundfunktionen der Website erforderlich.</p>
-                </div>
-                
-                <div class="cookie-category">
-                    <div class="cookie-header">
-                        <h5>Funktionale Cookies</h5>
-                        <label class="switch">
-                            <input type="checkbox" id="functionalCookies">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <p>Diese Cookies ermöglichen erweiterte Funktionen und Personalisierung.</p>
-                </div>
-                
-                <div class="cookie-category">
-                    <div class="cookie-header">
-                        <h5>Analyse-Cookies</h5>
-                        <label class="switch">
-                            <input type="checkbox" id="analyticsCookies">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <p>Diese Cookies helfen uns, die Nutzung unserer Website zu verstehen und zu verbessern.</p>
-                </div>
-                
-                <div class="cookie-category">
-                    <div class="cookie-header">
-                        <h5>Marketing-Cookies</h5>
-                        <label class="switch">
-                            <input type="checkbox" id="marketingCookies">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                    <p>Diese Cookies werden verwendet, um Werbung relevanter zu gestalten.</p>
-                </div>
-                
+                <p>Wählen Sie, welche Cookies Sie zulassen möchten.</p>
                 <div class="cookie-actions">
-                    <button class="btn btn-glass" onclick="saveSelectedCookies()">
-                        <i class="fas fa-save"></i> Auswahl speichern
-                    </button>
                     <button class="btn btn-primary" onclick="acceptAllCookies()">
                         <i class="fas fa-check"></i> Alle akzeptieren
                     </button>
@@ -658,112 +1849,457 @@
         </div>
     </div>
     
-    <!-- Toast Notifications -->
+    <!-- Toast -->
     <div id="toast" class="toast glass-morphism"></div>
     
-    <!-- Tooltip Container -->
-    <div id="tooltip" class="tooltip"></div>
-    
-    <!-- Scripts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.6.2/countUp.umd.min.js"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-    <script src="/js/app.js"></script>
-    
-    <!-- Particle Animation Script -->
     <script>
-        // Premium particle animation
-        const canvas = document.getElementById('particleCanvas');
-        const ctx = canvas.getContext('2d');
+// Global state
+const state = {
+    currentScreen: 'uploadScreen',
+    selectedFiles: [],
+    selectedPlan: null,
+    vehicleType: null,
+    analysisResult: null
+};
+
+// Initialize app
+document.addEventListener('DOMContentLoaded', () => {
+    initializeApp();
+    setupEventListeners();
+    initializeAnimations();
+    checkCookieConsent();
+});
+
+function initializeApp() {
+    // Initialize tooltips
+    initializeTooltips();
+    
+    // Show cookie banner after delay
+    setTimeout(() => {
+        if (!localStorage.getItem('cookieConsent')) {
+            document.getElementById('cookieBanner').classList.add('show');
+        }
+    }, 1000);
+}
+
+function setupEventListeners() {
+    // File handling
+    const photoInput = document.getElementById('photoInput');
+    const photoCard = document.getElementById('photoUploadCard');
+    
+    photoInput.addEventListener('change', handlePhotoSelect);
+    photoCard.addEventListener('dragover', handleDragOver);
+    photoCard.addEventListener('dragleave', handleDragLeave);
+    photoCard.addEventListener('drop', handleDrop);
+    
+    // URL input
+    const urlInput = document.getElementById('urlInput');
+    urlInput.addEventListener('input', handleUrlInput);
+    
+    // Analyze button
+    document.getElementById('analyzeBtn').addEventListener('click', startAnalysis);
+    
+    // Vehicle type selector
+    document.querySelectorAll('.vehicle-type-option').forEach(option => {
+        option.addEventListener('click', () => selectVehicleType(option.dataset.type));
+    });
+}
+
+// Initialize animations
+function initializeAnimations() {
+    // Particle animation
+    const canvas = document.getElementById('particleCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const particles = [];
+    const particleCount = 50;
+    
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 1;
+            this.speedX = Math.random() * 0.5 - 0.25;
+            this.speedY = Math.random() * 0.5 - 0.25;
+            this.opacity = Math.random() * 0.5 + 0.5;
+        }
         
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            
+            if (this.x > canvas.width) this.x = 0;
+            if (this.x < 0) this.x = canvas.width;
+            if (this.y > canvas.height) this.y = 0;
+            if (this.y < 0) this.y = canvas.height;
+        }
+        
+        draw() {
+            ctx.fillStyle = `rgba(59, 130, 246, ${this.opacity})`;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    
+    for (let i = 0; i < particleCount; i++) {
+        particles.push(new Particle());
+    }
+    
+    function animateParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach(particle => {
+            particle.update();
+            particle.draw();
+        });
+        
+        requestAnimationFrame(animateParticles);
+    }
+    
+    animateParticles();
+    
+    // Resize handler
+    window.addEventListener('resize', () => {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        
-        const particles = [];
-        const particleCount = 50;
-        
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 1;
-                this.speedX = Math.random() * 0.5 - 0.25;
-                this.speedY = Math.random() * 0.5 - 0.25;
-                this.opacity = Math.random() * 0.5 + 0.5;
-            }
-            
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                
-                if (this.x > canvas.width) this.x = 0;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.y > canvas.height) this.y = 0;
-                if (this.y < 0) this.y = canvas.height;
-            }
-            
-            draw() {
-                ctx.fillStyle = `rgba(59, 130, 246, ${this.opacity})`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-            }
+    });
+}
+
+// File handling
+function handlePhotoSelect(event) {
+    const files = Array.from(event.target.files);
+    validateAndAddFiles(files);
+}
+
+function handleDragOver(event) {
+    event.preventDefault();
+    event.currentTarget.classList.add('drag-over');
+}
+
+function handleDragLeave(event) {
+    event.currentTarget.classList.remove('drag-over');
+}
+
+function handleDrop(event) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('drag-over');
+    const files = Array.from(event.dataTransfer.files);
+    validateAndAddFiles(files);
+}
+
+function validateAndAddFiles(files) {
+    const validFiles = [];
+    const maxFileSize = 10 * 1024 * 1024; // 10MB
+    
+    files.forEach(file => {
+        if (!file.type.startsWith('image/')) {
+            showToast(`${file.name}: Nur Bilddateien erlaubt`, 'error');
+            return;
         }
         
-        for (let i = 0; i < particleCount; i++) {
-            particles.push(new Particle());
+        if (file.size > maxFileSize) {
+            showToast(`${file.name}: Zu groß (max. 10MB)`, 'error');
+            return;
         }
         
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            particles.forEach(particle => {
-                particle.update();
-                particle.draw();
-            });
-            
-            requestAnimationFrame(animateParticles);
+        validFiles.push(file);
+    });
+    
+    if (validFiles.length > 0) {
+        if (state.selectedFiles.length + validFiles.length > 10) {
+            showToast('Maximal 10 Bilder erlaubt', 'error');
+            return;
         }
         
-        animateParticles();
+        state.selectedFiles = [...state.selectedFiles, ...validFiles];
+        updateFilesPreview();
+        checkAnalyzeButton();
+    }
+}
+
+function updateFilesPreview() {
+    const preview = document.getElementById('filesPreview');
+    const filesList = document.getElementById('filesList');
+    
+    if (state.selectedFiles.length === 0) {
+        preview.classList.add('hidden');
+        return;
+    }
+    
+    preview.classList.remove('hidden');
+    filesList.innerHTML = '';
+    
+    state.selectedFiles.forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.className = 'file-item';
         
-        // Resize handler
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
-        
-        // Counter animation
-        const observerOptions = {
-            threshold: 0.5,
-            rootMargin: '0px'
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            fileItem.innerHTML = `
+                <img src="${e.target.result}" class="file-preview" alt="${file.name}">
+                <div class="file-info">
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">${formatFileSize(file.size)}</span>
+                </div>
+                <button class="file-remove" onclick="removeFile(${index})">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
         };
+        reader.readAsDataURL(file);
         
-        const counterObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !entry.target.classList.contains('counted')) {
-                    const counter = entry.target.querySelector('.stat-number');
-                    const target = parseFloat(counter.dataset.count);
-                    const decimal = parseInt(counter.dataset.decimal) || 0;
-                    
-                    const countUp = new countUp.CountUp(counter, target, {
-                        duration: 2,
-                        separator: '.',
-                        decimal: ',',
-                        decimalPlaces: decimal
-                    });
-                    
-                    if (!countUp.error) {
-                        countUp.start();
-                        entry.target.classList.add('counted');
-                    }
-                }
-            });
-        }, observerOptions);
-        
-        document.querySelectorAll('.animate-counter').forEach(el => {
-            counterObserver.observe(el);
-        });
+        filesList.appendChild(fileItem);
+    });
+}
+
+function removeFile(index) {
+    state.selectedFiles.splice(index, 1);
+    updateFilesPreview();
+    checkAnalyzeButton();
+}
+
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// URL input handling
+function handleUrlInput(event) {
+    const url = event.target.value.trim();
+    
+    if (!url) {
+        event.target.classList.remove('error', 'success');
+        checkAnalyzeButton();
+        return;
+    }
+    
+    if (isValidUrl(url)) {
+        event.target.classList.remove('error');
+        event.target.classList.add('success');
+    } else {
+        event.target.classList.add('error');
+        event.target.classList.remove('success');
+    }
+    
+    checkAnalyzeButton();
+}
+
+function isValidUrl(string) {
+    try {
+        const url = new URL(string);
+        return ['http:', 'https:'].includes(url.protocol);
+    } catch (_) {
+        return false;
+    }
+}
+
+// Vehicle type selection
+function selectVehicleType(type) {
+    state.vehicleType = type;
+    
+    document.querySelectorAll('.vehicle-type-option').forEach(option => {
+        option.classList.toggle('selected', option.dataset.type === type);
+    });
+    
+    showToast(`Fahrzeugtyp ausgewählt`, 'success');
+}
+
+// Check if analysis can start
+function checkAnalyzeButton() {
+    const btn = document.getElementById('analyzeBtn');
+    const hasFiles = state.selectedFiles.length > 0;
+    const hasValidUrl = document.getElementById('urlInput').classList.contains('success');
+    
+    btn.disabled = !(hasFiles || hasValidUrl);
+}
+
+// Start analysis
+function startAnalysis() {
+    showScreen('planScreen');
+}
+
+// Select plan
+function selectPlan(plan) {
+    state.selectedPlan = plan;
+    showToast(`${plan === 'premium' ? 'Premium' : 'Basis'}-Analyse gewählt`, 'success');
+    
+    // Simulate payment and analysis
+    setTimeout(() => {
+        performAnalysis();
+    }, 500);
+}
+
+// Perform analysis
+function performAnalysis() {
+    showScreen('analysisScreen');
+    
+    // Animate progress steps
+    const steps = ['step1', 'step2', 'step3'];
+    let currentStep = 0;
+    
+    const interval = setInterval(() => {
+        if (currentStep < steps.length) {
+            if (currentStep > 0) {
+                document.getElementById(steps[currentStep - 1]).classList.remove('active');
+                document.getElementById(steps[currentStep - 1]).classList.add('completed');
+            }
+            document.getElementById(steps[currentStep]).classList.add('active');
+            currentStep++;
+        } else {
+            clearInterval(interval);
+            showResults();
+        }
+    }, 2000);
+}
+
+// Show results
+function showResults() {
+    showScreen('resultsScreen');
+    
+    const content = document.getElementById('resultsContent');
+    content.innerHTML = `
+        <div class="result-card glass-morphism">
+            <h3>Analyse abgeschlossen!</h3>
+            <p>Ihre Fahrzeuganalyse wurde erfolgreich durchgeführt.</p>
+            <div class="verdict-icon">✅</div>
+            <h4>Empfehlung: Kaufen</h4>
+            <p>Das Fahrzeug befindet sich in einem guten Zustand.</p>
+            <button class="btn btn-primary" onclick="downloadReport()">
+                <i class="fas fa-download"></i> Bericht herunterladen
+            </button>
+        </div>
+    `;
+}
+
+// Screen navigation
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+    });
+    document.getElementById(screenId).classList.add('active');
+    state.currentScreen = screenId;
+    window.scrollTo(0, 0);
+}
+
+// Reset app
+function resetApp() {
+    state.selectedFiles = [];
+    state.selectedPlan = null;
+    state.vehicleType = null;
+    state.analysisResult = null;
+    
+    document.getElementById('photoInput').value = '';
+    document.getElementById('urlInput').value = '';
+    document.getElementById('urlInput').classList.remove('error', 'success');
+    document.querySelectorAll('.vehicle-type-option').forEach(option => {
+        option.classList.remove('selected');
+    });
+    
+    updateFilesPreview();
+    checkAnalyzeButton();
+    showScreen('uploadScreen');
+}
+
+// Download report
+function downloadReport() {
+    showToast('Bericht wird heruntergeladen...', 'success');
+    // In production, this would generate and download the actual report
+}
+
+// Toast notifications
+function showToast(message, type = 'info', duration = 3000) {
+    const toast = document.getElementById('toast');
+    
+    toast.className = 'toast glass-morphism';
+    toast.classList.add(type);
+    
+    const icons = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
+    };
+    
+    toast.innerHTML = `
+        <i class="${icons[type] || icons.info}"></i>
+        <span>${message}</span>
+    `;
+    
+    toast.classList.add('show');
+    
+    clearTimeout(toast.hideTimeout);
+    toast.hideTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+    }, duration);
+}
+
+// Modal handling
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('show');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('show');
+}
+
+// Cookie handling
+function checkCookieConsent() {
+    const consent = localStorage.getItem('cookieConsent');
+    if (consent) {
+        const banner = document.getElementById('cookieBanner');
+        if (banner) banner.classList.remove('show');
+    }
+}
+
+function acceptAllCookies() {
+    localStorage.setItem('cookieConsent', JSON.stringify({
+        necessary: true,
+        functional: true,
+        analytics: true,
+        marketing: true
+    }));
+    document.getElementById('cookieBanner').classList.remove('show');
+    closeModal('cookieSettingsModal');
+    showToast('Alle Cookies akzeptiert', 'success');
+}
+
+// Initialize tooltips
+function initializeTooltips() {
+    const tooltips = document.querySelectorAll('[data-tooltip]');
+    
+    tooltips.forEach(element => {
+        element.addEventListener('mouseenter', showTooltip);
+        element.addEventListener('mouseleave', hideTooltip);
+    });
+}
+
+function showTooltip(event) {
+    const text = event.target.dataset.tooltip;
+    const tooltip = document.createElement('div');
+    tooltip.className = 'tooltip';
+    tooltip.textContent = text;
+    
+    document.body.appendChild(tooltip);
+    
+    const rect = event.target.getBoundingClientRect();
+    tooltip.style.left = rect.left + rect.width / 2 - tooltip.offsetWidth / 2 + 'px';
+    tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
+    
+    setTimeout(() => tooltip.classList.add('show'), 10);
+}
+
+function hideTooltip() {
+    const tooltips = document.querySelectorAll('.tooltip');
+    tooltips.forEach(tooltip => tooltip.remove());
+}
     </script>
 </body>
 </html>
