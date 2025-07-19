@@ -353,6 +353,61 @@ function validateAndAddFiles(files) {
     }
 }
 
+// Remove file from selection
+function removeFile(index) {
+    state.selectedFiles.splice(index, 1);
+    updateFilesPreview();
+    checkAnalyzeButton();
+}
+
+// Update selected files preview
+function updateFilesPreview() {
+    const preview = document.getElementById('filesPreview');
+    const filesList = document.getElementById('filesList');
+
+    if (!preview || !filesList) return;
+
+    if (state.selectedFiles.length === 0) {
+        preview.classList.add('hidden');
+        filesList.innerHTML = '';
+        return;
+    }
+
+    preview.classList.remove('hidden');
+    filesList.innerHTML = '';
+
+    state.selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const item = document.createElement('div');
+            item.className = 'file-item';
+            item.innerHTML = `
+                <img src="${e.target.result}" class="file-preview" alt="${file.name}">
+                <div class="file-info">
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">${formatFileSize(file.size)}</span>
+                </div>
+                <button class="file-remove" onclick="removeFile(${index})">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            filesList.appendChild(item);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// Enable analyze button when input is sufficient
+function checkAnalyzeButton() {
+    const urlInput = document.getElementById('urlInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+
+    const hasFiles = state.selectedFiles.length > 0;
+    const hasValidUrl = urlInput.value.trim().length > 0 && isValidUrl(urlInput.value.trim());
+
+    analyzeBtn.disabled = !hasFiles && !hasValidUrl;
+}
+
 // AI-powered vehicle type detection from image
 async function analyzeImageForVehicleType(file) {
     // This would call a computer vision API in production
@@ -1138,6 +1193,178 @@ function setupSmoothScroll() {
             }
         });
     });
+}
+
+// -------- Utility & Modal Management --------
+
+async function registerServiceWorker() {
+    if ('serviceWorker' in navigator) {
+        try {
+            await navigator.serviceWorker.register('/sw.js');
+        } catch (err) {
+            console.error('SW registration failed', err);
+        }
+    }
+}
+
+function checkCookieConsent() {
+    const consent = localStorage.getItem('cookieConsent');
+    if (!consent) {
+        setTimeout(() => {
+            const banner = document.getElementById('cookieBanner');
+            if (banner) banner.classList.add('show');
+        }, 1000);
+    } else {
+        state.cookieConsent = JSON.parse(consent);
+        applyCookieSettings();
+    }
+}
+
+function acceptAllCookies() {
+    state.cookieConsent = { necessary: true, functional: true, analytics: true, marketing: true };
+    saveCookieConsent();
+    closeModal('cookieSettingsModal');
+    const banner = document.getElementById('cookieBanner');
+    if (banner) banner.classList.remove('show');
+    showToast('Cookie-Einstellungen gespeichert', 'success');
+}
+
+function saveSelectedCookies() {
+    state.cookieConsent = {
+        necessary: true,
+        functional: document.getElementById('functionalCookies').checked,
+        analytics: document.getElementById('analyticsCookies').checked,
+        marketing: document.getElementById('marketingCookies').checked
+    };
+    saveCookieConsent();
+    closeModal('cookieSettingsModal');
+    const banner = document.getElementById('cookieBanner');
+    if (banner) banner.classList.remove('show');
+    showToast('Cookie-Einstellungen gespeichert', 'success');
+}
+
+function saveCookieConsent() {
+    localStorage.setItem('cookieConsent', JSON.stringify(state.cookieConsent));
+    applyCookieSettings();
+}
+
+function applyCookieSettings() {
+    if (state.cookieConsent.analytics) {
+        initializeAnalytics();
+    }
+    if (state.cookieConsent.marketing) {
+        initializeMarketing();
+    }
+}
+
+function initializeAnalytics() {
+    console.log('Analytics initialized');
+}
+
+function initializeMarketing() {
+    console.log('Marketing tools initialized');
+}
+
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+}
+
+let dynamicModal = null;
+function showModalContent(content) {
+    closeCurrentModal();
+    dynamicModal = document.createElement('div');
+    dynamicModal.className = 'modal show';
+    dynamicModal.innerHTML = `<div class="modal-backdrop" onclick="closeCurrentModal()"></div><div class="modal-content glass-morphism">${content}</div>`;
+    document.body.appendChild(dynamicModal);
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCurrentModal() {
+    if (dynamicModal) {
+        dynamicModal.remove();
+        dynamicModal = null;
+        document.body.style.overflow = '';
+    }
+}
+
+function showScreen(screenId) {
+    document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active'));
+    const el = document.getElementById(screenId);
+    if (el) {
+        el.classList.add('active');
+        state.currentScreen = screenId;
+        window.scrollTo(0, 0);
+    }
+}
+
+function resetApp() {
+    state.selectedFiles = [];
+    state.selectedPlan = null;
+    state.vehicleType = null;
+    state.analysisResult = null;
+    document.getElementById('photoInput').value = '';
+    document.getElementById('urlInput').value = '';
+    document.querySelectorAll('.vehicle-type-option').forEach(opt => opt.classList.remove('selected'));
+    updateFilesPreview();
+    checkAnalyzeButton();
+    showScreen('uploadScreen');
+}
+
+function shareResults() {
+    if (!state.analysisResult) return;
+    const shareData = {
+        title: 'AutoPrüfer Pro Analyse',
+        text: `Meine Fahrzeuganalyse: ${state.analysisResult.summary}`,
+        url: window.location.href
+    };
+
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        navigator.share(shareData)
+            .then(() => showToast('Erfolgreich geteilt', 'success'))
+            .catch(err => {
+                if (err.name !== 'AbortError') {
+                    console.error('Share error:', err);
+                    copyToClipboard();
+                }
+            });
+    } else {
+        copyToClipboard();
+    }
+}
+
+function copyToClipboard() {
+    const text = `Ich habe mein Auto mit AutoPrüfer Pro analysiert! ${window.location.href}`;
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text)
+            .then(() => showToast('Link kopiert', 'success'))
+            .catch(() => showToast('Kopieren fehlgeschlagen', 'error'));
+    } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showToast('Link kopiert', 'success');
+        } catch (err) {
+            showToast('Kopieren fehlgeschlagen', 'error');
+        }
+        document.body.removeChild(textarea);
+    }
 }
 
 // Export functions for global access
