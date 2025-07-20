@@ -36,6 +36,13 @@ async function registerPlugins() {
         root: path.join(__dirname, '..', 'public'),
         prefix: '/'
     });
+
+    // Serve frontend configuration
+    fastify.get('/config.js', async (request, reply) => {
+        const publishable = process.env.STRIPE_PUBLISHABLE_KEY || '';
+        reply.type('application/javascript')
+            .send(`window.STRIPE_PUBLISHABLE_KEY = '${publishable}';`);
+    });
 }
 
 // Register routes
