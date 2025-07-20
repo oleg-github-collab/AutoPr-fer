@@ -47,8 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
-    // Initialize Stripe if library is available
-    if (window.Stripe && config.stripeKey) {
+    // Initialize Stripe if library is availabl
         state.stripe = Stripe(config.stripeKey);
     } else {
         console.warn('Stripe.js not loaded');
