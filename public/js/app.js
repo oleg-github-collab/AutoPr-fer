@@ -22,7 +22,8 @@ const state = {
 
 // Configuration
 const config = {
-    stripeKey: 'pk_test_YOUR_STRIPE_KEY', // Replace with your key
+    // Stripe publishable key injected from server
+    stripeKey: window.STRIPE_PUBLISHABLE_KEY || 'pk_test_YOUR_STRIPE_KEY',
     apiBaseUrl: '/api',
     maxFiles: 10,
     maxFileSize: 10 * 1024 * 1024, // 10MB
@@ -46,8 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initializeApp() {
-    // Initialize Stripe if library is available
-    if (window.Stripe) {
+    // Initialize Stripe if library is availabl
         state.stripe = Stripe(config.stripeKey);
     } else {
         console.warn('Stripe.js not loaded');
