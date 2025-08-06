@@ -1,343 +1,522 @@
-// server.js - AutoPrüfer Pro Backend
-const fastify = require('fastify')({ logger: true });
-const cors = require('@fastify/cors');
-const multipart = require('@fastify/multipart');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const OpenAI = require('openai');
-const sharp = require('sharp');
-const axios = require('axios');
-const cheerio = require('cheerio');
-const fs = require('fs').promises;
+// server.js - Hauptserver für Autoprüfer
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const multer = require('multer');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const fs = require('fs').promises;
+const cron = require('node-cron');
+const OpenAI = require('openai');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const PDFDocument = require('pdfkit');
+const sharp = require('sharp');
 
-// Initialize OpenAI
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// OpenAI Setup
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY
 });
 
-// Configure Fastify
-fastify.register(cors, {
-    origin: true,
-    credentials: true
+// Middleware
+app.use(cors());
+app.use(express.static('public'));
+app.use('/temp', express.static('temp'));
+app.use(express.json({ 
+  verify: (req, res, buf) => {
+    req.rawBody = buf.toString('utf-8');
+  }
+}));
+
+// Multer setup für Bildupload
+const storage = multer.diskStorage({
+  destination: async (req, file, cb) => {
+    await fs.mkdir('temp', { recursive: true });
+    cb(null, 'temp/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  }
 });
 
-fastify.register(multipart, {
-    limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB
-        files: 10
+const upload = multer({ 
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|webp/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype);
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb(new Error('Nur Bilder sind erlaubt'));
     }
+  }
 });
 
-// Serve static files
-fastify.register(require('@fastify/static'), {
-    root: path.join(__dirname, 'public'),
-    prefix: '/'
-});
+// Store for analysis results (in production use Redis)
+const analysisResults = new Map();
 
-// Health check
-fastify.get('/health', async (request, reply) => {
-    return { status: 'ok', timestamp: new Date().toISOString() };
-});
+// ========== PROMPTS ==========
+const prompts = {
+  basic: `Du bist ein erfahrener KFZ-Gutachter und Gebrauchtwagen-Experte. Analysiere das Fahrzeug und gib eine kurze Einschätzung.
 
-// Create Stripe checkout session
-fastify.post('/api/create-checkout-session', async (request, reply) => {
-    const { plan } = request.body;
-    
-    const prices = {
-        basic: {
-            amount: 499, // 4.99€ in cents
-            name: 'Basis-Check',
-            description: 'Schnelle KI-Analyse für Ihr Fahrzeug'
-        },
-        premium: {
-            amount: 1699, // 16.99€ in cents
-            name: 'Premium-Analyse',
-            description: 'Umfassende Analyse mit 40+ Parametern und Chat-Beratung'
-        }
-    };
-    
-    const selectedPrice = prices[plan];
-    if (!selectedPrice) {
-        return reply.code(400).send({ error: 'Invalid plan selected' });
-    }
-    
-    try {
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card', 'sepa_debit', 'ideal', 'sofort'],
-            line_items: [{
-                price_data: {
-                    currency: 'eur',
-                    product_data: {
-                        name: selectedPrice.name,
-                        description: selectedPrice.description,
-                    },
-                    unit_amount: selectedPrice.amount,
-                },
-                quantity: 1,
-            }],
-            mode: 'payment',
-            success_url: `${process.env.BASE_URL}?success=true&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.BASE_URL}?canceled=true`,
-            metadata: {
-                plan: plan
-            }
-        });
-        
-        return { id: session.id };
-    } catch (error) {
-        fastify.log.error(error);
-        return reply.code(500).send({ error: 'Failed to create checkout session' });
-    }
-});
+Deine Aufgabe (Basic-Analyse):
+1. Bewerte den Preis (fair/zu hoch/günstig)
+2. Liste 3-5 wichtige Punkte, auf die beim Kauf geachtet werden sollte
+3. Nenne typische Schwachstellen dieses Modells
+4. Gib eine kurze Kaufempfehlung
 
-// Main analysis endpoint
-fastify.post('/api/analyze', async (request, reply) => {
-    try {
-        const data = await request.file();
-        const photos = [];
-        let url = null;
-        let plan = 'basic';
-        
-        // Parse multipart data
-        const parts = request.parts();
-        for await (const part of parts) {
-            if (part.type === 'file') {
-                // Process uploaded photos
-                const buffer = await part.toBuffer();
-                const optimized = await sharp(buffer)
-                    .resize(1200, 1200, { fit: 'inside', withoutEnlargement: true })
-                    .jpeg({ quality: 85 })
-                    .toBuffer();
-                
-                const base64 = optimized.toString('base64');
-                photos.push(`data:image/jpeg;base64,${base64}`);
-            } else if (part.fieldname === 'url') {
-                url = part.value;
-            } else if (part.fieldname === 'plan') {
-                plan = part.value;
-            }
-        }
-        
-        // Prepare data for analysis
-        let analysisData = {
-            photos: photos,
-            listingText: '',
-            url: url
-        };
-        
-        // If URL provided, scrape the listing
-        if (url) {
-            analysisData.listingText = await scrapeListing(url);
-        }
-        
-        // Call ChatGPT for analysis
-        const analysis = await analyzeWithGPT(analysisData, plan);
-        
-        return analysis;
-    } catch (error) {
-        fastify.log.error(error);
-        return reply.code(500).send({ error: 'Analysis failed', message: error.message });
-    }
-});
+Halte die Antwort kompakt (max. 300 Wörter) und verständlich für Laien.`,
 
-// Scrape listing from popular German car websites
-async function scrapeListing(url) {
-    try {
-        const response = await axios.get(url, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-            }
-        });
-        
-        const $ = cheerio.load(response.data);
-        let listingText = '';
-        
-        // Mobile.de scraping
-        if (url.includes('mobile.de')) {
-            listingText += $('.g-col-12 h1').text() + '\n';
-            listingText += $('.description-text').text() + '\n';
-            listingText += $('.price-block').text() + '\n';
-            $('.key-features__item').each((i, el) => {
-                listingText += $(el).text().trim() + '\n';
-            });
-        }
-        // AutoScout24 scraping
-        else if (url.includes('autoscout24')) {
-            listingText += $('h1').text() + '\n';
-            listingText += $('.cldt-stage-price').text() + '\n';
-            listingText += $('.cldt-stage-primary-keyfact').text() + '\n';
-            listingText += $('.cldt-stage-description').text() + '\n';
-        }
-        // eBay Kleinanzeigen scraping
-        else if (url.includes('kleinanzeigen.de')) {
-            listingText += $('#viewad-title').text() + '\n';
-            listingText += $('#viewad-price').text() + '\n';
-            listingText += $('#viewad-description-text').text() + '\n';
-        }
-        
-        return listingText.substring(0, 3000); // Limit text length
-    } catch (error) {
-        fastify.log.error('Scraping error:', error);
-        return '';
-    }
-}
+  standard: `Du bist ein erfahrener KFZ-Gutachter und Marktanalyst. Erstelle eine detaillierte Fahrzeuganalyse.
 
-// Analyze with ChatGPT
-async function analyzeWithGPT(data, plan) {
-    const systemPrompt = `Du bist ein erfahrener Kfz-Gutachter mit über 20 Jahren Erfahrung im deutschen Automarkt. 
-    Du analysierst Fahrzeuge basierend auf Fotos und Inseratsdaten für potenzielle Käufer.
-    
-    Deine Analyse muss IMMER diese Struktur haben:
-    1. GESAMTBEWERTUNG: "Empfehlenswert", "Mit Vorsicht zu genießen", oder "Nicht empfehlenswert"
-    2. HAUPTRISIKEN: Typische Probleme für dieses Modell/Baujahr
-    3. VERDÄCHTIGE PUNKTE: Was am Inserat/Fotos auffällt
-    4. VERHANDLUNGSTIPPS: Konkrete Argumente für Preisverhandlung
-    5. WEITERE EMPFEHLUNGEN: Was beim Besichtigen zu prüfen ist
-    
-    ${plan === 'premium' ? 'Für Premium-Analysen: Erstelle eine SEHR detaillierte Analyse mit mindestens 40 Prüfpunkten, inkl. Unterhaltskosten, Versicherungseinstufung, Wiederverkaufswert, Vergleich mit Konkurrenzmodellen.' : ''}
-    
-    Antworte IMMER auf Deutsch. Sei ehrlich aber konstruktiv.`;
-    
-    const userPrompt = `Analysiere dieses Fahrzeug:
-    ${data.listingText ? `Inseratstext: ${data.listingText}` : 'Kein Inseratstext verfügbar'}
-    ${data.photos.length > 0 ? `Es wurden ${data.photos.length} Fotos hochgeladen.` : 'Keine Fotos verfügbar'}
-    ${data.url ? `Inserat-URL: ${data.url}` : ''}`;
-    
-    try {
-        const messages = [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-        ];
-        
-        // Add images if available
-        if (data.photos.length > 0) {
-            messages[1].content = [
-                { type: "text", text: userPrompt },
-                ...data.photos.map(photo => ({
-                    type: "image_url",
-                    image_url: { url: photo }
-                }))
-            ];
-        }
-        
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: messages,
-            max_tokens: plan === 'premium' ? 3000 : 1000,
-            temperature: 0.7,
-        });
-        
-        const response = completion.choices[0].message.content;
-        
-        // Parse the response into structured format
-        return parseGPTResponse(response, plan);
-    } catch (error) {
-        fastify.log.error('GPT API error:', error);
-        throw new Error('Analysis failed');
-    }
-}
+Deine Aufgabe (Standard-Analyse):
+1. **Preisbewertung**: Vergleiche mit aktuellen Marktpreisen
+2. **Technische Einschätzung**: Typische Probleme, Wartungskosten
+3. **Verhandlungstipps**: Konkrete Argumente für Preisverhandlung
+4. **Alternative Modelle**: 3-4 vergleichbare Fahrzeuge
+5. **Kilometerstand-Bewertung**: Ist der Kilometerstand für das Alter angemessen?
+6. **Wiederverkaufswert**: Prognose für die nächsten 3 Jahre
 
-// Parse GPT response into structured format
-function parseGPTResponse(response, plan) {
-    const sections = response.split(/\d\.\s+[A-Z]+:/);
-    
-    let verdict = 'caution';
-    if (response.toLowerCase().includes('empfehlenswert') && !response.toLowerCase().includes('nicht empfehlenswert')) {
-        verdict = 'recommended';
-    } else if (response.toLowerCase().includes('nicht empfehlenswert')) {
-        verdict = 'not_recommended';
-    }
-    
-    const result = {
-        verdict: verdict,
-        summary: extractSection(response, 'GESAMTBEWERTUNG'),
-        risks: extractListItems(response, 'HAUPTRISIKEN'),
-        suspiciousPoints: extractListItems(response, 'VERDÄCHTIGE PUNKTE'),
-        negotiation: extractListItems(response, 'VERHANDLUNGSTIPPS'),
-        recommendations: extractListItems(response, 'WEITERE EMPFEHLUNGEN'),
-        plan: plan
-    };
-    
-    if (plan === 'premium') {
-        // Add detailed data for premium infographics
-        result.detailedAnalysis = {
-            maintenanceCosts: extractSection(response, 'UNTERHALTSKOSTEN'),
-            insuranceClass: extractSection(response, 'VERSICHERUNG'),
-            resaleValue: extractSection(response, 'WIEDERVERKAUFSWERT'),
-            competitors: extractListItems(response, 'KONKURRENZMODELLE'),
-            technicalDetails: extractListItems(response, 'TECHNISCHE DETAILS'),
-            // Additional data for charts
-            monthlyCosting: {
-                fuel: 150,
-                insurance: 100,
-                maintenance: 80,
-                tax: 22,
-                depreciation: 200
-            },
-            depreciationCurve: [
-                { year: 0, value: 24900 },
-                { year: 1, value: 21500 },
-                { year: 2, value: 18500 },
-                { year: 3, value: 16000 },
-                { year: 4, value: 14000 },
-                { year: 5, value: 12000 }
-            ],
-            competitorComparison: {
-                'BMW 320d': { price: 75, performance: 85, fuel: 80, comfort: 85, reliability: 75, fun: 90 },
-                'Mercedes C220d': { price: 70, performance: 80, fuel: 85, comfort: 90, reliability: 80, fun: 75 },
-                'Audi A4 40 TDI': { price: 72, performance: 82, fuel: 82, comfort: 88, reliability: 78, fun: 80 }
-            },
-            technicalRatings: {
-                engine: 85,
-                transmission: 92,
-                electronics: 78,
-                chassis: 88,
-                brakes: 82
-            },
-            keyStats: {
-                fuelConsumption: 5.5,
-                annualInsurance: 1200,
-                annualMaintenance: 1500,
-                resalePercentage: 64
-            }
-        };
-    }
-    
-    return result;
-}
+Strukturiere deine Antwort klar mit Überschriften. Nutze konkrete Zahlen wo möglich.`,
 
-// Helper function to extract section content
-function extractSection(text, sectionName) {
-    const regex = new RegExp(`${sectionName}:?\\s*([^\\n]+)`, 'i');
-    const match = text.match(regex);
-    return match ? match[1].trim() : '';
-}
+  premium: `Du bist ein zertifizierter KFZ-Sachverständiger mit 20 Jahren Erfahrung. Erstelle ein umfassendes Gutachten.
 
-// Helper function to extract list items
-function extractListItems(text, sectionName) {
-    const sectionRegex = new RegExp(`${sectionName}:?\\s*([^\\d]+)(?=\\d\\.|$)`, 'is');
-    const sectionMatch = text.match(sectionRegex);
-    
-    if (!sectionMatch) return [];
-    
-    const sectionText = sectionMatch[1];
-    const items = sectionText.split(/[-•*]\s+/)
-        .map(item => item.trim())
-        .filter(item => item.length > 10);
-    
-    return items;
-}
+Deine Aufgabe (Premium-Analyse):
 
-// Start server
-const start = async () => {
-    try {
-        await fastify.listen({ port: process.env.PORT || 3000, host: '0.0.0.0' });
-        console.log(`Server running on port ${process.env.PORT || 3000}`);
-    } catch (err) {
-        fastify.log.error(err);
-        process.exit(1);
-    }
+## 1. MARKTANALYSE
+- Aktueller Marktwert (Min/Durchschnitt/Max)
+- Preisentwicklung der letzten 12 Monate
+- Regionale Preisunterschiede
+- Händler vs. Privatpreise
+
+## 2. TECHNISCHE BEWERTUNG
+- Motoranalyse und bekannte Probleme
+- Getriebe und Antriebsstrang
+- Fahrwerk und Bremsen
+- Elektronik und Assistenzsysteme
+- Karosserie und Rostanfälligkeit
+
+## 3. UNTERHALTSKOSTEN
+- Kraftstoffverbrauch (real vs. Herstellerangabe)
+- Versicherungseinstufung
+- KFZ-Steuer
+- Wartungsintervalle und -kosten
+- Typische Reparaturkosten nach Kilometern
+
+## 4. HISTORIE & RÜCKRUFE
+- Bekannte Rückrufaktionen
+- Modellpflegen und Verbesserungen
+- Typische Vorbesitzer-Profile
+
+## 5. KAUFBERATUNG
+- Detaillierte Checkliste für Besichtigung
+- Kritische Punkte bei Probefahrt
+- Verhandlungsstrategie mit konkreten Argumenten
+- Empfohlene Werkstätten in der Region
+
+## 6. ALTERNATIVEN
+- 5 vergleichbare Modelle mit Vor-/Nachteilen
+- Preis-Leistungs-Vergleich
+
+## 7. ZUKUNFTSPROGNOSE
+- Wertverlust-Kurve für 5 Jahre
+- Technologie-Zukunftsfähigkeit
+- Umweltzonen und Fahrverbote
+
+## 8. FAZIT & EMPFEHLUNG
+- Klare Kauf-/Nichtkauf-Empfehlung mit Begründung
+- Maximaler empfohlener Kaufpreis
+- Timing-Empfehlung (jetzt kaufen oder warten)
+
+Wenn ein Bild vorhanden ist, analysiere zusätzlich:
+- Zustand der Karosserie
+- Reifenprofil und -zustand
+- Sichtbare Mängel oder Schäden
+- Gepflegtheit des Innenraums
+
+Verwende konkrete Zahlen, Statistiken und Fakten. Sei kritisch aber fair.`
 };
 
-start();
+// ========== HELPER FUNCTIONS ==========
+async function processImage(imagePath) {
+  try {
+    const processedImage = await sharp(imagePath)
+      .resize(1024, 1024, { 
+        fit: 'inside',
+        withoutEnlargement: true 
+      })
+      .jpeg({ quality: 85 })
+      .toBuffer();
+    
+    return processedImage.toString('base64');
+  } catch (error) {
+    console.error('Image processing error:', error);
+    throw error;
+  }
+}
+
+async function generatePDF(vehicleData, analysisText) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({
+      size: 'A4',
+      margins: { top: 50, left: 50, right: 50, bottom: 50 },
+      info: {
+        Title: 'Autoprüfer Fahrzeuganalyse',
+        Author: 'Autoprüfer',
+        Subject: `Analyse ${vehicleData.brand} ${vehicleData.model}`
+      }
+    });
+    
+    const filename = `analyse-${Date.now()}.pdf`;
+    const filepath = path.join('temp', filename);
+    const stream = fs.createWriteStream(filepath);
+    
+    doc.pipe(stream);
+    
+    // Header with logo placeholder
+    doc.rect(50, 50, 100, 30)
+       .fillAndStroke('#1e40af', '#1e40af');
+    
+    doc.fontSize(20)
+       .fillColor('#ffffff')
+       .text('Autoprüfer', 55, 58, { width: 90, align: 'center' });
+    
+    doc.fontSize(24)
+       .fillColor('#1e40af')
+       .text('Fahrzeuganalyse Premium', 170, 55);
+    
+    // Date
+    doc.fontSize(10)
+       .fillColor('#666666')
+       .text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 400, 60);
+    
+    doc.moveDown(3);
+    
+    // Vehicle Info Box
+    doc.rect(50, 120, 495, 100)
+       .stroke('#e5e7eb');
+    
+    doc.fontSize(14)
+       .fillColor('#1e40af')
+       .text('FAHRZEUGDATEN', 60, 130);
+    
+    doc.fontSize(11)
+       .fillColor('#000000')
+       .text(`Fahrzeug: ${vehicleData.brand} ${vehicleData.model}`, 60, 155)
+       .text(`Baujahr: ${vehicleData.year}`, 60, 175)
+       .text(`Kilometerstand: ${new Intl.NumberFormat('de-DE').format(vehicleData.mileage)} km`, 60, 195);
+    
+    doc.text(`Preis: ${new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(vehicleData.price)}`, 300, 155)
+       .text(`Standort: ${vehicleData.city}`, 300, 175);
+    
+    if (vehicleData.vin) {
+      doc.text(`VIN: ${vehicleData.vin}`, 300, 195);
+    }
+    
+    // Main Analysis
+    doc.fontSize(14)
+       .fillColor('#1e40af')
+       .text('DETAILLIERTE ANALYSE', 50, 250);
+    
+    doc.moveDown();
+    
+    // Parse and format analysis text
+    const sections = analysisText.split('##').filter(s => s.trim());
+    let currentY = doc.y;
+    
+    sections.forEach((section, index) => {
+      // Check if we need a new page
+      if (currentY > 650) {
+        doc.addPage();
+        currentY = 50;
+      }
+      
+      const lines = section.trim().split('\n');
+      const title = lines[0];
+      const content = lines.slice(1).join('\n');
+      
+      if (title) {
+        doc.fontSize(12)
+           .fillColor('#1e40af')
+           .text(title.trim(), 50, currentY);
+        
+        currentY += 20;
+        
+        doc.fontSize(10)
+           .fillColor('#000000')
+           .text(content.trim(), 50, currentY, {
+             width: 495,
+             align: 'justify',
+             lineGap: 2
+           });
+        
+        currentY = doc.y + 15;
+      }
+    });
+    
+    // Footer on last page
+    const pages = doc.bufferedPageRange();
+    for (let i = 0; i < pages.count; i++) {
+      doc.switchToPage(i);
+      
+      // Page number
+      doc.fontSize(8)
+         .fillColor('#666666')
+         .text(`Seite ${i + 1} von ${pages.count}`, 50, 770, { align: 'center', width: 495 });
+      
+      // Footer text
+      doc.fontSize(8)
+         .text('© 2024 Autoprüfer - KI-gestützte Fahrzeuganalyse | Powered by OpenAI GPT-4', 50, 785, { 
+           align: 'center', 
+           width: 495 
+         });
+    }
+    
+    doc.end();
+    
+    stream.on('finish', () => {
+      resolve(filepath);
+    });
+    
+    stream.on('error', reject);
+  });
+}
+
+async function analyzeVehicle(vehicleData, plan, imagePath) {
+  try {
+    // Prepare messages
+    const messages = [
+      {
+        role: "system",
+        content: prompts[plan]
+      },
+      {
+        role: "user",
+        content: `Analysiere folgendes Fahrzeug:
+        Marke/Modell: ${vehicleData.brand} ${vehicleData.model}
+        Baujahr: ${vehicleData.year}
+        Kilometerstand: ${vehicleData.mileage} km
+        Preis: ${vehicleData.price} €
+        Standort: ${vehicleData.city}
+        ${vehicleData.vin ? `VIN: ${vehicleData.vin}` : ''}
+        ${vehicleData.description ? `Zusätzliche Informationen: ${vehicleData.description}` : ''}`
+      }
+    ];
+
+    // Add image if provided
+    if (imagePath) {
+      const imageBase64 = await processImage(imagePath);
+      messages.push({
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: "Bitte analysiere auch das beigefügte Fahrzeugbild und beziehe deine Beobachtungen in die Analyse ein."
+          },
+          {
+            type: "image_url",
+            image_url: {
+              url: `data:image/jpeg;base64,${imageBase64}`,
+              detail: "high"
+            }
+          }
+        ]
+      });
+    }
+
+    // Call OpenAI API
+    const completion = await openai.chat.completions.create({
+      model: imagePath ? "gpt-4o" : "gpt-4-turbo-preview",
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: plan === 'premium' ? 4000 : plan === 'standard' ? 2000 : 1000
+    });
+
+    const analysisText = completion.choices[0].message.content;
+
+    // Generate PDF for Premium plan
+    if (plan === 'premium') {
+      const pdfPath = await generatePDF(vehicleData, analysisText);
+      return {
+        success: true,
+        analysis: analysisText,
+        pdfUrl: `/temp/${path.basename(pdfPath)}`,
+        plan: plan
+      };
+    }
+
+    return {
+      success: true,
+      analysis: analysisText,
+      plan: plan
+    };
+
+  } catch (error) {
+    console.error('Analysis error:', error);
+    throw error;
+  }
+}
+
+// ========== ROUTES ==========
+app.post('/api/create-checkout', async (req, res) => {
+  try {
+    const { plan, vehicleData } = req.body;
+    
+    const prices = {
+      basic: process.env.STRIPE_PRICE_BASIC,
+      standard: process.env.STRIPE_PRICE_STANDARD,
+      premium: process.env.STRIPE_PRICE_PREMIUM
+    };
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card', 'giropay', 'sofort'],
+      line_items: [{
+        price: prices[plan],
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: `${process.env.SERVER_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.SERVER_URL}/`,
+      metadata: {
+        plan: plan,
+        vehicleData: JSON.stringify(vehicleData)
+      },
+      locale: 'de'
+    });
+
+    res.json({ sessionId: session.id });
+  } catch (error) {
+    console.error('Checkout error:', error);
+    res.status(500).json({ error: 'Fehler beim Erstellen der Checkout-Session' });
+  }
+});
+
+app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (err) {
+    console.error('Webhook signature verification failed:', err);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    
+    try {
+      const vehicleData = JSON.parse(session.metadata.vehicleData);
+      const plan = session.metadata.plan;
+      
+      // Trigger analysis
+      const result = await analyzeVehicle(vehicleData, plan, null);
+      
+      // Store result
+      analysisResults.set(session.id, result);
+      
+      // Auto-delete after 1 hour
+      setTimeout(() => {
+        analysisResults.delete(session.id);
+      }, 3600000);
+      
+    } catch (error) {
+      console.error('Error processing successful payment:', error);
+    }
+  }
+
+  res.json({ received: true });
+});
+
+app.post('/api/analyze-direct', upload.single('image'), async (req, res) => {
+  try {
+    const vehicleData = JSON.parse(req.body.vehicleData || '{}');
+    const plan = req.body.plan;
+    const imagePath = req.file ? req.file.path : null;
+    
+    const result = await analyzeVehicle(vehicleData, plan, imagePath);
+    
+    // Cleanup uploaded image after processing
+    if (imagePath) {
+      setTimeout(async () => {
+        try {
+          await fs.unlink(imagePath);
+        } catch (err) {
+          console.error('Error deleting temp file:', err);
+        }
+      }, 5000);
+    }
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Analysis error:', error);
+    res.status(500).json({ error: 'Fehler bei der Analyse' });
+  }
+});
+
+app.get('/api/results/:sessionId', (req, res) => {
+  const { sessionId } = req.params;
+  const result = analysisResults.get(sessionId);
+  
+  if (result) {
+    res.json(result);
+  } else {
+    res.status(404).json({ error: 'Ergebnisse noch nicht verfügbar' });
+  }
+});
+
+app.get('/success.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'success.html'));
+});
+
+// Cleanup temp files every hour
+cron.schedule('0 * * * *', async () => {
+  console.log('Cleaning up temp files...');
+  try {
+    await fs.mkdir('temp', { recursive: true });
+    const files = await fs.readdir('temp');
+    const now = Date.now();
+    
+    for (const file of files) {
+      const filePath = path.join('temp', file);
+      const stats = await fs.stat(filePath);
+      if (now - stats.mtime.getTime() > 3600000) { // 1 hour
+        await fs.unlink(filePath);
+        console.log(`Deleted old file: ${file}`);
+      }
+    }
+  } catch (error) {
+    console.error('Cleanup error:', error);
+  }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ 
+    error: 'Ein Fehler ist aufgetreten',
+    message: process.env.NODE_ENV === 'development' ? err.message : undefined
+  });
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`
+  ╔═══════════════════════════════════════╗
+  ║                                       ║
+  ║     Autoprüfer Server gestartet      ║
+  ║                                       ║
+  ║     Port: ${PORT}                     ║
+  ║     Umgebung: ${process.env.NODE_ENV || 'development'}         ║
+  ║                                       ║
+  ╚═══════════════════════════════════════╝
+  `);
+});

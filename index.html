@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autoprüfer - KI-basierte Fahrzeuganalyse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .plan-card {
+            transition: all 0.3s ease;
+        }
+        .plan-card:hover {
+            transform: translateY(-5px);
+        }
+        .plan-card.selected {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .loading {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="gradient-bg text-white">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-car text-3xl"></i>
+                    <h1 class="text-2xl font-bold">Autoprüfer</h1>
+                </div>
+                <p class="hidden md:block text-sm">KI-basierte Fahrzeuganalyse in Sekunden</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="gradient-bg text-white py-16">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                Ihr Gebrauchtwagen-Experte
+            </h2>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">
+                Erhalten Sie eine professionelle KI-Analyse Ihres Wunschfahrzeugs. 
+                Sparen Sie Zeit und Geld mit unserem intelligenten Bewertungssystem.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 text-sm">
+                <div class="flex items-center"><i class="fas fa-check-circle mr-2"></i> Sofortanalyse</div>
+                <div class="flex items-center"><i class="fas fa-check-circle mr-2"></i> Keine Registrierung</div>
+                <div class="flex items-center"><i class="fas fa-check-circle mr-2"></i> KI-gestützt</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+        <!-- Pricing Plans -->
+        <section class="mb-16">
+            <h3 class="text-2xl font-bold text-center mb-8">Wählen Sie Ihren Analyseplan</h3>
+            <div class="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+                <!-- Basic Plan -->
+                <div class="plan-card bg-white rounded-lg shadow-lg p-6 border-2 border-gray-200 cursor-pointer" onclick="selectPlan('basic')">
+                    <input type="radio" name="plan" value="basic" id="plan-basic" class="hidden">
+                    <div class="text-center mb-4">
+                        <h4 class="text-xl font-bold mb-2">Basic</h4>
+                        <p class="text-3xl font-bold text-gray-800">4,99 €</p>
+                        <p class="text-sm text-gray-600">Einmalig</p>
+                    </div>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Grundlegende Fahrzeugbewertung</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Wichtigste Prüfpunkte</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Preiseinschätzung</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Sofortergebnis</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Standard Plan -->
+                <div class="plan-card bg-white rounded-lg shadow-lg p-6 border-2 border-gray-200 cursor-pointer relative" onclick="selectPlan('standard')">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm">Beliebt</span>
+                    </div>
+                    <input type="radio" name="plan" value="standard" id="plan-standard" class="hidden">
+                    <div class="text-center mb-4">
+                        <h4 class="text-xl font-bold mb-2">Standard</h4>
+                        <p class="text-3xl font-bold text-gray-800">9,99 €</p>
+                        <p class="text-sm text-gray-600">Einmalig</p>
+                    </div>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm font-semibold">Alles aus Basic</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Detaillierte Marktanalyse</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Verhandlungstipps</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Alternative Fahrzeuge</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Typische Schwachstellen</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Premium Plan -->
+                <div class="plan-card bg-white rounded-lg shadow-lg p-6 border-2 border-gray-200 cursor-pointer" onclick="selectPlan('premium')">
+                    <input type="radio" name="plan" value="premium" id="plan-premium" class="hidden">
+                    <div class="text-center mb-4">
+                        <h4 class="text-xl font-bold mb-2">Premium</h4>
+                        <p class="text-3xl font-bold text-gray-800">24,99 €</p>
+                        <p class="text-sm text-gray-600">Einmalig</p>
+                    </div>
+                    <ul class="space-y-3 mb-6">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm font-semibold">Alles aus Standard</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">PDF-Report (20+ Seiten)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Wartungshistorie-Analyse</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Wiederverkaufsprognose</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Händlerempfehlungen</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-2"></i>
+                            <span class="text-sm">Bildanalyse (wenn vorhanden)</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Form -->
+        <section class="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+            <h3 class="text-2xl font-bold mb-6">Fahrzeugdaten eingeben</h3>
+            
+            <form id="analysisForm" class="space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Marke *</label>
+                        <input type="text" name="brand" required placeholder="z.B. BMW" 
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Modell *</label>
+                        <input type="text" name="model" required placeholder="z.B. 320d" 
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Baujahr *</label>
+                        <input type="number" name="year" required placeholder="z.B. 2018" min="1900" max="2024"
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Kilometerstand *</label>
+                        <input type="number" name="mileage" required placeholder="z.B. 85000" 
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Preis (€) *</label>
+                        <input type="number" name="price" required placeholder="z.B. 25900" 
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Stadt/PLZ *</label>
+                        <input type="text" name="location" required placeholder="z.B. München oder 80331" 
+                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">VIN (optional)</label>
+                    <input type="text" name="vin" placeholder="Fahrzeug-Identifizierungsnummer" 
+                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Fahrzeugfotos (optional, max. 5)</label>
+                    <input type="file" name="images" multiple accept="image/*" 
+                           class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    <p class="text-xs text-gray-600 mt-1">Nur für Premium-Analyse verwendet</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium mb-2">Zusätzliche Informationen (optional)</label>
+                    <textarea name="additionalInfo" rows="3" placeholder="z.B. Unfallschäden, Serviceheft vorhanden, etc."
+                              class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"></textarea>
+                </div>
+
+                <button type="submit" id="submitButton" 
+                        class="w-full bg-purple-600 text-white py-3 rounded-lg font-semibold hover:bg-purple-700 transition duration-200">
+                    Zur Zahlung und Analyse
+                </button>
+            </form>
+        </section>
+
+        <!-- Results Section (hidden by default) -->
+        <section id="resultsSection" class="hidden max-w-4xl mx-auto mt-12">
+            <div class="bg-white rounded-lg shadow-lg p-8">
+                <h3 class="text-2xl font-bold mb-6">Analyseergebnis</h3>
+                <div id="resultsContent" class="prose max-w-none"></div>
+                <div id="downloadSection" class="hidden mt-6">
+                    <a id="downloadLink" href="#" 
+                       class="inline-block bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition duration-200">
+                        <i class="fas fa-download mr-2"></i> PDF herunterladen
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-lg p-8 max-w-sm mx-auto text-center">
+                <div class="loading">
+                    <i class="fas fa-cog fa-spin text-4xl text-purple-600 mb-4"></i>
+                </div>
+                <p class="text-lg font-semibold mb-2">Analyse läuft...</p>
+                <p class="text-sm text-gray-600">Dies kann einen Moment dauern</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="container mx-auto px-4 text-center">
+            <p class="mb-2">&copy; 2024 Autoprüfer. Alle Rechte vorbehalten.</p>
+            <p class="text-sm text-gray-400">KI-basierte Analyse. Keine Gewähr für Vollständigkeit.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Stripe
+        const stripe = Stripe('YOUR_STRIPE_PUBLISHABLE_KEY'); // Replace with your key
+        
+        let selectedPlan = null;
+        
+        function selectPlan(plan) {
+            selectedPlan = plan;
+            
+            // Update UI
+            document.querySelectorAll('.plan-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            document.getElementById(`plan-${plan}`).checked = true;
+            document.getElementById(`plan-${plan}`).closest('.plan-card').classList.add('selected');
+        }
+        
+        // Select Standard plan by default
+        selectPlan('standard');
+        
+        document.getElementById('analysisForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedPlan) {
+                alert('Bitte wählen Sie einen Analyseplan aus.');
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            formData.append('plan', selectedPlan);
+            
+            // Show loading state
+            document.getElementById('loadingState').classList.remove('hidden');
+            
+            try {
+                // Create checkout session
+                const response = await fetch('/api/create-checkout-session', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const session = await response.json();
+                
+                // Store form data in sessionStorage for use after payment
+                sessionStorage.setItem('analysisData', JSON.stringify(Object.fromEntries(formData)));
+                sessionStorage.setItem('sessionId', session.id);
+                
+                // Redirect to Stripe Checkout
+                const result = await stripe.redirectToCheckout({
+                    sessionId: session.id
+                });
+                
+                if (result.error) {
+                    alert(result.error.message);
+                    document.getElementById('loadingState').classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Ein Fehler ist aufgetreten. Bitte versuchen Sie es erneut.');
+                document.getElementById('loadingState').classList.add('hidden');
+            }
+        });
+        
+        // Check if returning from payment
+        window.addEventListener('load', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            const sessionId = urlParams.get('session_id');
+            
+            if (success === 'true' && sessionId) {
+                // Show loading state
+                document.getElementById('loadingState').classList.remove('hidden');
+                
+                try {
+                    // Get stored form data
+                    const analysisData = JSON.parse(sessionStorage.getItem('analysisData'));
+                    
+                    // Start analysis
+                    const response = await fetch('/api/analyze', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            ...analysisData,
+                            sessionId: sessionId
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    // Hide loading state
+                    document.getElementById('loadingState').classList.add('hidden');
+                    
+                    // Show results
+                    document.getElementById('resultsContent').innerHTML = result.analysis;
+                    document.getElementById('resultsSection').classList.remove('hidden');
+                    
+                    // Show download link for Premium
+                    if (result.pdfUrl && analysisData.plan === 'premium') {
+                        document.getElementById('downloadLink').href = result.pdfUrl;
+                        document.getElementById('downloadSection').classList.remove('hidden');
+                    }
+                    
+                    // Scroll to results
+                    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Clear sessionStorage
+                    sessionStorage.removeItem('analysisData');
+                    sessionStorage.removeItem('sessionId');
+                    
+                    // Clean URL
+                    window.history.replaceState({}, document.title, '/');
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Ein Fehler ist aufgetreten bei der Analyse.');
+                    document.getElementById('loadingState').classList.add('hidden');
+                }
+            } else if (success === 'false') {
+                alert('Die Zahlung wurde abgebrochen.');
+            }
+        });
+    </script>
+</body>
+</html>
