@@ -1,4 +1,5 @@
 // backend/stripeWebhook.js
+import 'dotenv/config';
 import express from 'express';
 import Stripe from 'stripe';
 import { analyzeFromSession } from './analyze.js';
@@ -44,24 +45,16 @@ router.post('/', async (req, res) => {
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Nur relevante Events behandeln
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
-
-      // Optional: Session auffrischen/expandieren, wenn nötig
-      // const fullSession = await stripe.checkout.sessions.retrieve(session.id, { expand: ['line_items'] });
-
-      // Analyse anstoßen (asynchron). Erwartet, что analyzeFromSession сам зберігає результат у resultsStore.
       try {
         await analyzeFromSession(session);
       } catch (e) {
         console.error('Analyse-Fehler für Session', session.id, e);
-        // Збережемо "failed" стан, щоб фронтенд не чекав безкінечно
         resultsStore.set(session.id, { text: 'Analyse fehlgeschlagen. Bitte Support kontaktieren.', plan: session.metadata?.plan || 'unknown' }, 60 * 60 * 1000);
       }
     }
 
-    // 200 OK — Stripe требує швидкої відповіді
     res.json({ received: true });
   } catch (e) {
     console.error('Webhook-Handler Fehler:', e);

@@ -21,7 +21,7 @@ const app = express();
 // Wichtig hinter Proxy (Railway/Render/Heroku/NGINX): erlaubt korrektes req.protocol aus x-forwarded-proto
 app.set('trust proxy', 1);
 
-// перед створенням Stripe
+// Stripe sicher initialisieren (verhindert "apiKey should be a string")
 const stripeApiKey = (process.env.STRIPE_SECRET_KEY ?? '').trim();
 if (!stripeApiKey) {
   console.error('Fehler: STRIPE_SECRET_KEY ist nicht gesetzt oder leer. Bitte Environment-Variable konfigurieren.');
@@ -63,7 +63,7 @@ function getBaseUrl(req) {
   return base.replace(/\/+$/, '');
 }
 
-// .env Validierung
+// .env Validierung (nur Logging – der Server startet trotzdem, außer STRIPE_SECRET_KEY fehlt)
 const missing = [];
 if (!process.env.STRIPE_SECRET_KEY) missing.push('STRIPE_SECRET_KEY');
 if (!process.env.OPENAI_API_KEY) missing.push('OPENAI_API_KEY');
@@ -257,6 +257,21 @@ app.get('/reports/:sessionId', (req, res) => {
 
 // Stripe Webhook mounten (muss vor JSON-Parser stehen -> oben raw gesetzt)
 app.use('/api/stripe/webhook', stripeWebhookRouter);
+
+// Diag-Route (видали після перевірки)
+app.get('/__diag', (req, res) => {
+  const key = (process.env.STRIPE_SECRET_KEY ?? '').trim();
+  const pub = (process.env.STRIPE_PUBLISHABLE_KEY ?? '').trim();
+  const wh = (process.env.STRIPE_WEBHOOK_SECRET ?? '').trim();
+  res.json({
+    stripeSecretKeyPresent: !!key,
+    stripeSecretKeyPrefix: key ? (key.startsWith('sk_live') ? 'sk_live' : (key.startsWith('sk_test') ? 'sk_test' : 'unknown')) : 'none',
+    stripeSecretKeyLength: key.length,
+    publishableKeyPresent: !!pub,
+    webhookSecretPresent: !!wh,
+    publicBaseUrl: RAW_PUBLIC_BASE_URL || '(auto via headers)',
+  });
+});
 
 // Fallback: index.html für alle Routen (SPA-Feeling)
 app.get('*', (req, res) => {
