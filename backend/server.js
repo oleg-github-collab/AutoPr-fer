@@ -17,20 +17,66 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
+
+// Wichtig hinter Proxy (Railway/Render/Heroku/NGINX): erlaubt korrektes req.protocol aus x-forwarded-proto
+app.set('trust proxy', 1);
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-06-20' });
 
 const PORT = process.env.PORT || 8080;
-const PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL; // z.B. https://autopruefer.up.railway.app
+const RAW_PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL; // z.B. https://autopr-fer-production.up.railway.app
 const TTL_MS = Number(process.env.TTL_MS || 3600000);
 
-if (!process.env.STRIPE_SECRET_KEY || !process.env.OPENAI_API_KEY || !process.env.STRIPE_PUBLISHABLE_KEY || !process.env.STRIPE_WEBHOOK_SECRET || !PUBLIC_BASE_URL) {
-  console.error('FEHLENDE .env Variablen. Bitte .env konfigurieren.');
+// Hilfsfunktionen für absolute URLs
+function isAbsoluteUrl(u) {
+  try {
+    const x = new URL(u);
+    return x.protocol === 'http:' || x.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+// Ermittelt die Basis-URL der App. Bevorzugt ENV, sonst aus Request-Headern.
+// Fügt automatisch https:// hinzu, falls jemand ENV ohne Schema eingetragen hat.
+function getBaseUrl(req) {
+  let fromEnv = RAW_PUBLIC_BASE_URL?.trim();
+  if (fromEnv) {
+    if (!/^https?:\/\//i.test(fromEnv)) {
+      fromEnv = 'https://' + fromEnv;
+    }
+    if (isAbsoluteUrl(fromEnv)) {
+      return fromEnv.replace(/\/+$/, '');
+    }
+  }
+
+  // Fallback über Header (funktioniert hinter Proxy dank app.set('trust proxy', 1))
+  const proto = (req.headers['x-forwarded-proto'] || req.protocol || 'http').toString().split(',')[0].trim();
+  const host = (req.headers['x-forwarded-host'] || req.headers.host || '').toString().split(',')[0].trim();
+  const base = `${proto}://${host}`;
+  return base.replace(/\/+$/, '');
+}
+
+// .env Validierung
+const missing = [];
+if (!process.env.STRIPE_SECRET_KEY) missing.push('STRIPE_SECRET_KEY');
+if (!process.env.OPENAI_API_KEY) missing.push('OPENAI_API_KEY');
+if (!process.env.STRIPE_PUBLISHABLE_KEY) missing.push('STRIPE_PUBLISHABLE_KEY');
+if (!process.env.STRIPE_WEBHOOK_SECRET) missing.push('STRIPE_WEBHOOK_SECRET');
+
+if (missing.length) {
+  console.error('FEHLENDE .env Variablen:', missing.join(', '), '— bitte .env konfigurieren.');
+}
+if (!RAW_PUBLIC_BASE_URL) {
+  console.warn('Hinweis: PUBLIC_BASE_URL ist nicht gesetzt. Es wird automatisch aus Request-Headern ermittelt.');
+} else if (!/^https?:\/\//i.test(RAW_PUBLIC_BASE_URL)) {
+  console.warn('Hinweis: PUBLIC_BASE_URL ohne Schema gefunden — es wird automatisch https:// vorangestellt.');
 }
 
 // CORS (falls nötig)
 app.use(cors());
 
-// RAW-Body NUR für Webhook (Stripe Verifizierung benötigt den unveränderten Body)
+// RAW-Body NUR für Webhook (Stripe-Verifizierung benötigt den unveränderten Body)
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 // JSON Parser für alle anderen Routen
@@ -83,8 +129,10 @@ app.post('/api/upload', upload.single('photo'), (req, res) => {
 
     uploadsStore.set(id, { filePath, ext }, TTL_MS);
 
-    // Öffentliche URL, damit OpenAI Vision die Datei abrufen kann
-    const publicUrl = `${PUBLIC_BASE_URL}/uploads/${id}`;
+    // Öffentliche URL, damit OpenAI Vision die Datei abrufen kann (immer absolut mit Schema)
+    const baseUrl = getBaseUrl(req);
+    const publicUrl = new URL(`/uploads/${id}`, baseUrl).toString();
+
     res.json({ uploadId: id, url: publicUrl, expiresAt });
   } catch (e) {
     console.error('Upload-Fehler:', e);
@@ -111,9 +159,9 @@ app.post('/api/create-checkout', async (req, res) => {
     }
 
     const prices = {
-      basic: 499,
-      standard: 999,
-      premium: 2499
+      basic: 499,    // €4.99
+      standard: 999, // €9.99
+      premium: 2499  // €24.99
     };
 
     if (!prices[plan]) {
@@ -137,6 +185,11 @@ app.post('/api/create-checkout', async (req, res) => {
       uploadId: uploadId || ''
     };
 
+    // Erfolgs- und Abbruch-URLs immer als absolute URLs mit Schema bauen
+    const baseUrl = getBaseUrl(req);
+    const successUrl = new URL('/?success=true&session_id={CHECKOUT_SESSION_ID}', baseUrl).toString();
+    const cancelUrl = new URL('/?canceled=true', baseUrl).toString();
+
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
@@ -154,11 +207,12 @@ app.post('/api/create-checkout', async (req, res) => {
           quantity: 1
         }
       ],
-      success_url: `${PUBLIC_BASE_URL}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${PUBLIC_BASE_URL}/?canceled=true`,
+      success_url: successUrl,
+      cancel_url: cancelUrl,
       metadata
     });
 
+    // Für Stripe.js-Redirect im Frontend wird sessionId verwendet
     res.json({ sessionId: session.id });
   } catch (e) {
     console.error('Checkout-Fehler:', e);
@@ -176,7 +230,11 @@ app.get('/api/result', async (req, res) => {
     return res.json({ status: 'pending' });
   }
   const { text, pdfPath, plan } = entry;
-  const pdfUrl = pdfPath ? `${PUBLIC_BASE_URL}/reports/${sessionId}` : null;
+
+  // PDF-Link immer absolut mit Schema
+  const baseUrl = getBaseUrl(req);
+  const pdfUrl = pdfPath ? new URL(`/reports/${sessionId}`, baseUrl).toString() : null;
+
   res.json({ status: 'ready', plan, text, pdfUrl });
 });
 
