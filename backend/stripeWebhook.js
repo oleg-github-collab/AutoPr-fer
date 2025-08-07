@@ -1,23 +1,13 @@
 // backend/stripeWebhook.js
 import 'dotenv/config';
 import express from 'express';
-import Stripe from 'stripe';
+import { getStripe } from './index.js';  // ІМПОРТ З ГОЛОВНОГО ФАЙЛУ
 import { analyzeFromSession } from './analyze.js';
 import { resultsStore } from '../utils/store.js';
 
 const router = express.Router();
 
-// Stripe-Factory (lazy init + caching)
-let stripeSingleton = null;
-function getStripe() {
-  const apiKey = (process.env.STRIPE_SECRET_KEY ?? '').trim();
-  if (!apiKey) {
-    throw new Error('STRIPE_SECRET_KEY ist nicht gesetzt oder leer. Bitte Environment-Variable konfigurieren.');
-  }
-  if (stripeSingleton) return stripeSingleton;
-  stripeSingleton = new Stripe(apiKey, { apiVersion: '2024-06-20' });
-  return stripeSingleton;
-}
+// ВИДАЛЕНО ДУБЛІКАТ getStripe() - використовуємо з index.js
 
 // Webhook Secret prüfen
 const webhookSecret = (process.env.STRIPE_WEBHOOK_SECRET ?? '').trim();
@@ -25,14 +15,12 @@ if (!webhookSecret) {
   console.error('Fehler: STRIPE_WEBHOOK_SECRET ist nicht gesetzt oder leer. Bitte Environment-Variable konfigurieren.');
 }
 
-// Wichtig: In server.js ist für diesen Pfad express.raw({ type: 'application/json' }) registriert.
-// Hier NUR req.body (roher Buffer/String) verwenden — KEIN JSON-Parser!
 router.post('/', async (req, res) => {
   try {
     // 1) Stripe lazy init bei Request-Time
     let stripe;
     try {
-      stripe = getStripe();
+      stripe = getStripe(); // ВИКОРИСТОВУЄМО ІМПОРТОВАНУ ФУНКЦІЮ
     } catch (e) {
       console.error('Webhook Stripe-Init Fehler:', e.message);
       return res.status(500).send('Stripe nicht initialisiert (fehlender STRIPE_SECRET_KEY).');

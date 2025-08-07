@@ -22,15 +22,23 @@ const app = express();
 app.set('trust proxy', 1);
 
 const PORT = process.env.PORT || 8080;
-const RAW_PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL; // z.B. https://autopr-fer-production.up.railway.app
+const RAW_PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL;
 const TTL_MS = Number(process.env.TTL_MS || 3600000);
 
-// Stripe-Factory (lazy init + caching), щоб уникати помилок на рівні імпорту
+// Stripe-Factory (lazy init + caching) - ЕДИНСТВЕННАЯ ФУНКЦИЯ
 let stripeSingleton = null;
 function getStripe() {
-  const apiKey = (process.env.STRIPE_SECRET_KEY ?? '').trim();
+  const rawKey = process.env.STRIPE_SECRET_KEY;
+  console.log('=== STRIPE DEBUG ===');
+  console.log('rawKey exists:', !!rawKey);
+  console.log('rawKey type:', typeof rawKey);
+  console.log('rawKey length:', rawKey ? rawKey.length : 0);
+  console.log('rawKey first 10 chars:', rawKey ? rawKey.substring(0, 10) : 'none');
+  console.log('===================');
+
+  const apiKey = (rawKey ?? '').trim();
   if (!apiKey) {
-    throw new Error('STRIPE_SECRET_KEY ist nicht gesetzt oder leer. Bitte Environment-Variable konfigurieren.');
+    throw new Error('STRIPE_SECRET_KEY ist nicht gesetzt oder leer.');
   }
   if (stripeSingleton) return stripeSingleton;
   stripeSingleton = new Stripe(apiKey, { apiVersion: '2024-06-20' });
@@ -291,3 +299,6 @@ cleanupScheduler();
 app.listen(PORT, () => {
   console.log(`Autoprüfer läuft auf Port ${PORT}`);
 });
+
+// Експортуємо функцію getStripe для використання в інших файлах
+export { getStripe };
