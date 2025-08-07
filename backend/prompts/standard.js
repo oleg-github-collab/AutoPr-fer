@@ -1,14 +1,29 @@
-const standardPrompt = `
-Du bist "Autoprüfer". Erstelle eine detaillierte Analyse auf Deutsch.
+// backend/prompts/standard.js
 
-Format:
-1) Kurzfazit (2 Sätze)
-2) Preisbewertung (unter/marktgerecht/über Markt, 1–2 Sätze, mit Begründung)
-3) Verhandlungstipps (3–5 Punkte)
-4) Marktvergleich (3–4 Alternativen mit kurzer Begründung)
-5) 3‑Jahres-Prognose (Wertentwicklung, Laufleistung, Risiken)
-6) Empfehlung (Grün/Gelb/Rot) mit 1 Satz Begründung
-
-Stil: komprimiert, fachlich, nutzerorientiert. Keine Platzhalter. Nutze Bildhinweise, wenn vorhanden.`;
-
-export default standardPrompt;
+export function standardPrompt({ vehicle = {}, context = {} } = {}) {
+    const brand = vehicle.brand ?? '-';
+    const model = vehicle.model ?? '-';
+    const year = vehicle.year ?? '-';
+    const mileage = Number(vehicle.mileage ?? 0).toLocaleString('de-DE');
+    const price = Number(vehicle.price ?? 0).toLocaleString('de-DE');
+  
+    const extra = context && Object.keys(context).length
+      ? `\n\n[Zusätzlicher Kontext]\n${JSON.stringify(context, null, 2)}`
+      : '';
+  
+    return [
+      'Du bist ein Kfz-Sachverständiger. Erstelle eine ausführlichere Standard-Analyse.',
+      'Sprache: Deutsch.',
+      '\n[Fahrzeugdaten]',
+      `- Marke/Modell: ${brand} ${model}`,
+      `- Baujahr: ${year}`,
+      `- Kilometerstand: ${mileage} km`,
+      `- Preis: ${price} €`,
+      extra,
+      '\n[Aufgabe]',
+      '- Beurteile Zustand, nenne typische Schwachstellen und grobe Wartungskosten.',
+      '- Prüfe die Plausibilität des Preises und gib eine Kaufempfehlung (kurz begründet).'
+    ].join('\n');
+  }
+  
+  export default standardPrompt;

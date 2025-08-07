@@ -1,13 +1,29 @@
-const basicPrompt = `
-Du bist "Autoprüfer", ein Kfz-Experte. Erstelle eine prägnante, strukturierte Gebrauchtwagen-Schnellanalyse auf Deutsch.
+// backend/prompts/basic.js
 
-Format:
-1) Kurzfazit (1–2 Sätze)
-2) Preis-/Leistungs-Eindruck (kurz)
-3) 5 wichtigste Checkpunkte bei der Besichtigung
-4) Häufige Schwachstellen für genau diese Baureihe (falls bekannt)
-5) Klare Kaufempfehlung mit Ampel (Grün/Gelb/Rot)
-
-Stil: präzise, sachlich, ohne Floskeln. Keine Platzhalter, keine Entschuldigungen. Nutze die gelieferten Fahrzeugdaten, optional Bildhinweise, aber erfinde keine Fakten.`;
-
-export default basicPrompt;
+export function basicPrompt({ vehicle = {}, context = {} } = {}) {
+    const brand = vehicle.brand ?? '-';
+    const model = vehicle.model ?? '-';
+    const year = vehicle.year ?? '-';
+    const mileage = Number(vehicle.mileage ?? 0).toLocaleString('de-DE');
+    const price = Number(vehicle.price ?? 0).toLocaleString('de-DE');
+  
+    const extra = context && Object.keys(context).length
+      ? `\n\n[Zusätzlicher Kontext]\n${JSON.stringify(context, null, 2)}`
+      : '';
+  
+    return [
+      'Du bist ein Kfz-Experte. Erstelle eine kurze, prägnante Ersteinschätzung (Basic) zu diesem Gebrauchtwagen.',
+      'Sprache: Deutsch.',
+      '\n[Fahrzeugdaten]',
+      `- Marke/Modell: ${brand} ${model}`,
+      `- Baujahr: ${year}`,
+      `- Kilometerstand: ${mileage} km`,
+      `- Preis: ${price} €`,
+      extra,
+      '\n[Aufgabe]',
+      '- Nenne 3–5 Hauptpunkte: grober Zustand, Plausibilität von Preis/Laufleistung, schnelle Empfehlung.',
+      '- Halte dich kurz.'
+    ].join('\n');
+  }
+  
+  export default basicPrompt;
