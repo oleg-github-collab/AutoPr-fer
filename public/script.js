@@ -1,4 +1,4 @@
-const stripe = Stripe('pk_live_YOUR_PUBLISHABLE_KEY'); // Replace with your key
+const stripe = Stripe('pk_live_51Q0HfxDBpC1eLwca79W27peKK1iXG1NPxc9ONLu9HYqpWRAqyXdJldnYzXCuHY0cTXXjS3qV4a73TGdhYgqXOVlb002CEJrCnM'); // Replace with your key
 
 document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
     e.preventDefault();
