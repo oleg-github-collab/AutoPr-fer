@@ -21,7 +21,13 @@ const app = express();
 // Wichtig hinter Proxy (Railway/Render/Heroku/NGINX): erlaubt korrektes req.protocol aus x-forwarded-proto
 app.set('trust proxy', 1);
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-06-20' });
+// перед створенням Stripe
+const stripeApiKey = (process.env.STRIPE_SECRET_KEY ?? '').trim();
+if (!stripeApiKey) {
+  console.error('Fehler: STRIPE_SECRET_KEY ist nicht gesetzt oder leer. Bitte Environment-Variable konfigurieren.');
+  process.exit(1);
+}
+const stripe = new Stripe(stripeApiKey, { apiVersion: '2024-06-20' });
 
 const PORT = process.env.PORT || 8080;
 const RAW_PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL; // z.B. https://autopr-fer-production.up.railway.app
