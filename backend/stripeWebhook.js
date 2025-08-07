@@ -7,13 +7,17 @@ import { resultsStore } from '../utils/store.js';
 
 const router = express.Router();
 
-// Stripe sicher initialisieren (verhindert "apiKey should be a string")
-const stripeApiKey = (process.env.STRIPE_SECRET_KEY ?? '').trim();
-if (!stripeApiKey) {
-  console.error('Fehler: STRIPE_SECRET_KEY ist nicht gesetzt oder leer. Bitte Environment-Variable konfigurieren.');
-  // Не завершуємо процес тут, щоб сервер стартував; але вебхук працювати не буде, поки не виправите ENV.
+// Stripe-Factory (lazy init + caching)
+let stripeSingleton = null;
+function getStripe() {
+  const apiKey = (process.env.STRIPE_SECRET_KEY ?? '').trim();
+  if (!apiKey) {
+    throw new Error('STRIPE_SECRET_KEY ist nicht gesetzt oder leer. Bitte Environment-Variable konfigurieren.');
+  }
+  if (stripeSingleton) return stripeSingleton;
+  stripeSingleton = new Stripe(apiKey, { apiVersion: '2024-06-20' });
+  return stripeSingleton;
 }
-const stripe = stripeApiKey ? new Stripe(stripeApiKey, { apiVersion: '2024-06-20' }) : null;
 
 // Webhook Secret prüfen
 const webhookSecret = (process.env.STRIPE_WEBHOOK_SECRET ?? '').trim();
@@ -25,9 +29,15 @@ if (!webhookSecret) {
 // Hier NUR req.body (roher Buffer/String) verwenden — KEIN JSON-Parser!
 router.post('/', async (req, res) => {
   try {
-    if (!stripe) {
+    // 1) Stripe lazy init bei Request-Time
+    let stripe;
+    try {
+      stripe = getStripe();
+    } catch (e) {
+      console.error('Webhook Stripe-Init Fehler:', e.message);
       return res.status(500).send('Stripe nicht initialisiert (fehlender STRIPE_SECRET_KEY).');
     }
+
     if (!webhookSecret) {
       return res.status(500).send('STRIPE_WEBHOOK_SECRET fehlt.');
     }
@@ -45,8 +55,10 @@ router.post('/', async (req, res) => {
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
+    // Nur relevante Events behandeln
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
+
       try {
         await analyzeFromSession(session);
       } catch (e) {
@@ -55,6 +67,7 @@ router.post('/', async (req, res) => {
       }
     }
 
+    // 200 OK — Stripe erwartet schnelle Antwort
     res.json({ received: true });
   } catch (e) {
     console.error('Webhook-Handler Fehler:', e);
