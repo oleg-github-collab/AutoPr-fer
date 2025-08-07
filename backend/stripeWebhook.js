@@ -1,13 +1,11 @@
 // backend/stripeWebhook.js
 import 'dotenv/config';
 import express from 'express';
-import { getStripe } from './index.js';  // ІМПОРТ З ГОЛОВНОГО ФАЙЛУ
+import { getStripe } from './server.js';  // ВИПРАВЛЕНО!
 import { analyzeFromSession } from './analyze.js';
 import { resultsStore } from '../utils/store.js';
 
 const router = express.Router();
-
-// ВИДАЛЕНО ДУБЛІКАТ getStripe() - використовуємо з index.js
 
 // Webhook Secret prüfen
 const webhookSecret = (process.env.STRIPE_WEBHOOK_SECRET ?? '').trim();
@@ -20,7 +18,7 @@ router.post('/', async (req, res) => {
     // 1) Stripe lazy init bei Request-Time
     let stripe;
     try {
-      stripe = getStripe(); // ВИКОРИСТОВУЄМО ІМПОРТОВАНУ ФУНКЦІЮ
+      stripe = getStripe(); // ВИКОРИСТОВУЄМО ФУНКЦІЮ З server.js
     } catch (e) {
       console.error('Webhook Stripe-Init Fehler:', e.message);
       return res.status(500).send('Stripe nicht initialisiert (fehlender STRIPE_SECRET_KEY).');
