@@ -2,6 +2,7 @@ const OpenAI = require('openai');
 const { getPrompt } = require('./prompts');
 const { generatePDF } = require('../utils/pdfGenerator');
 const { processImage } = require('../utils/imageProcessor');
+const path = require('path');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
