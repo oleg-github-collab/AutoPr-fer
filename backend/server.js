@@ -21,17 +21,21 @@ const app = express();
 // Wichtig hinter Proxy (Railway/Render/Heroku/NGINX): erlaubt korrektes req.protocol aus x-forwarded-proto
 app.set('trust proxy', 1);
 
-// Stripe sicher initialisieren (verhindert "apiKey should be a string")
-const stripeApiKey = (process.env.STRIPE_SECRET_KEY ?? '').trim();
-if (!stripeApiKey) {
-  console.error('Fehler: STRIPE_SECRET_KEY ist nicht gesetzt oder leer. Bitte Environment-Variable konfigurieren.');
-  process.exit(1);
-}
-const stripe = new Stripe(stripeApiKey, { apiVersion: '2024-06-20' });
-
 const PORT = process.env.PORT || 8080;
 const RAW_PUBLIC_BASE_URL = process.env.PUBLIC_BASE_URL; // z.B. https://autopr-fer-production.up.railway.app
 const TTL_MS = Number(process.env.TTL_MS || 3600000);
+
+// Stripe-Factory (lazy init + caching), щоб уникати помилок на рівні імпорту
+let stripeSingleton = null;
+function getStripe() {
+  const apiKey = (process.env.STRIPE_SECRET_KEY ?? '').trim();
+  if (!apiKey) {
+    throw new Error('STRIPE_SECRET_KEY ist nicht gesetzt oder leer. Bitte Environment-Variable konfigurieren.');
+  }
+  if (stripeSingleton) return stripeSingleton;
+  stripeSingleton = new Stripe(apiKey, { apiVersion: '2024-06-20' });
+  return stripeSingleton;
+}
 
 // Hilfsfunktionen für absolute URLs
 function isAbsoluteUrl(u) {
@@ -63,7 +67,7 @@ function getBaseUrl(req) {
   return base.replace(/\/+$/, '');
 }
 
-// .env Validierung (nur Logging – der Server startet trotzdem, außer STRIPE_SECRET_KEY fehlt)
+// .env Validierung (nur Logging – der Server startet trotzdem)
 const missing = [];
 if (!process.env.STRIPE_SECRET_KEY) missing.push('STRIPE_SECRET_KEY');
 if (!process.env.OPENAI_API_KEY) missing.push('OPENAI_API_KEY');
@@ -195,6 +199,9 @@ app.post('/api/create-checkout', async (req, res) => {
     const baseUrl = getBaseUrl(req);
     const successUrl = new URL('/?success=true&session_id={CHECKOUT_SESSION_ID}', baseUrl).toString();
     const cancelUrl = new URL('/?canceled=true', baseUrl).toString();
+
+    // Stripe lazy init
+    const stripe = getStripe();
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
