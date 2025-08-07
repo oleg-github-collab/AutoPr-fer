@@ -1,290 +1,346 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autoprüfer - KI-gestützte Gebrauchtwagenanalyse</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://js.stripe.com/v3/"></script>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autoprüfer - KI-gestützte Gebrauchtwagenanalyse</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚗</text></svg>">
+  <style>
+    :root {
+      --neon-blue: #00d4ff;
+      --neon-purple: #a855f7;
+      --neon-pink: #ff0080;
+      --neon-green: #00ff88;
+      --dark-bg: #0a0a0a;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a; color: white; overflow-x: hidden;
+    }
+    #particles-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+    .gradient-orb { position: fixed; border-radius: 50%; filter: blur(100px); opacity: 0.5; animation: float 20s ease-in-out infinite; pointer-events: none; }
+    .orb-1 { width: 600px; height: 600px; background: var(--neon-blue); top: -200px; left: -200px; }
+    .orb-2 { width: 800px; height: 800px; background: var(--neon-purple); bottom: -300px; right: -300px; animation-delay: -10s; }
+    .orb-3 { width: 500px; height: 500px; background: var(--neon-pink); top: 50%; left: 50%; transform: translate(-50%, -50%); animation-delay: -5s; }
+    @keyframes float {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(30px, -50px) scale(1.1); }
+      66% { transform: translate(-20px, 20px) scale(0.9); }
+    }
+    .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4); }
+    .glass-card { background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden; }
+    .glass-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent); transition: left 0.6s; }
+    .glass-card:hover::before { left: 100%; }
+    .glass-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0, 212, 255, 0.3); border-color: rgba(0, 212, 255, 0.5); }
+    .plan-selected { border: 2px solid var(--neon-blue) !important; background: linear-gradient(135deg, rgba(0, 212, 255, 0.15) 0%, rgba(168, 85, 247, 0.1) 100%) !important; box-shadow: 0 0 30px rgba(0, 212, 255, 0.4) !important; }
+    .neon-button { background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)); color: white; border: none; padding: 16px 40px; border-radius: 12px; font-weight: 600; font-size: 18px; cursor: pointer; position: relative; overflow: hidden; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(0, 212, 255, 0.4); }
+    .neon-button::after { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; border-radius: 50%; background: rgba(255, 255, 255, 0.3); transform: translate(-50%, -50%); transition: width 0.6s, height 0.6s; }
+    .neon-button:hover::after { width: 300px; height: 300px; }
+    .neon-button:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0, 212, 255, 0.6); }
+    .neon-button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .glass-input { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 14px 20px; border-radius: 12px; transition: all 0.3s ease; width: 100%; font-size: 16px; }
+    .glass-input:focus { outline: none; border-color: var(--neon-blue); background: rgba(255, 255, 255, 0.08); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+    .glass-input::placeholder { color: rgba(255, 255, 255, 0.4); }
+    .loading-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.9); display:none; align-items:center; justify-content:center; z-index:9999; }
+    .loading-spinner { width: 80px; height: 80px; border: 4px solid rgba(0, 212, 255, 0.2); border-top-color: var(--neon-blue); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .neon-text { background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .result-card { background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(168, 85, 247, 0.05) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 24px; padding: 40px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5); }
+    @media (max-width: 768px) { .glass-card { margin: 10px 0; } .orb-1, .orb-2, .orb-3 { width: 300px; height: 300px; } }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-        <div class="container mx-auto px-4 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <h1 class="text-2xl font-bold text-gray-900">Autoprüfer</h1>
-                </div>
-                <p class="text-gray-600 hidden md:block">Professionelle Fahrzeuganalyse mit KI</p>
-            </div>
+<body>
+  <canvas id="particles-canvas"></canvas>
+  <div class="gradient-orb orb-1"></div>
+  <div class="gradient-orb orb-2"></div>
+  <div class="gradient-orb orb-3"></div>
+
+  <header class="glass sticky top-0 z-50 px-6 py-4">
+    <div class="container mx-auto flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-purple-600 flex items-center justify-center shadow-lg">
+          <span class="text-2xl">🚗</span>
         </div>
-    </header>
+        <h1 class="text-2xl font-bold"><span class="neon-text">Autoprüfer</span></h1>
+      </div>
+      <div class="hidden md:flex items-center space-x-6 text-sm text-gray-400">
+        <span>🔒 Sicher</span>
+        <span>⚡ Schnell</span>
+        <span>🤖 KI-powered</span>
+      </div>
+    </div>
+  </header>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-4 py-8 max-w-6xl">
-        <!-- Hero Section -->
-        <div class="text-center mb-10">
-            <h2 class="text-4xl font-bold text-gray-900 mb-4">
-                Ihr Gebrauchtwagen unter der Lupe
-            </h2>
-            <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                Nutzen Sie künstliche Intelligenz für eine objektive Bewertung. 
-                In wenigen Sekunden erhalten Sie eine professionelle Analyse.
-            </p>
+  <main class="container mx-auto px-4 py-12 max-w-7xl">
+    <div class="text-center mb-16">
+      <h2 class="text-5xl md:text-7xl font-bold mb-6">
+        <span class="text-white">Ihr Auto.</span><br />
+        <span class="neon-text">Unsere KI-Analyse.</span>
+      </h2>
+      <p class="text-xl text-gray-400 max-w-3xl mx-auto">Professionelle Fahrzeugbewertung in Sekunden mit GPT-4o (Vision)</p>
+      <div class="mt-8 flex flex-wrap justify-center gap-4">
+        <div class="px-4 py-2 glass rounded-full text-sm">✅ Keine Registrierung</div>
+        <div class="px-4 py-2 glass rounded-full text-sm">⚡ Sofort-Ergebnis</div>
+        <div class="px-4 py-2 glass rounded-full text-sm">🔒 100% Datenschutz</div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8 mb-12">
+      <div class="glass-card p-8 cursor-pointer plan-card" data-plan="basic">
+        <div class="text-center mb-6">
+          <h3 class="text-2xl font-bold mb-2">Basic</h3>
+          <div class="text-5xl font-bold neon-text">4,99€</div>
+          <p class="text-sm text-gray-400 mt-2">Schnellanalyse</p>
         </div>
+        <ul class="space-y-4 text-gray-300">
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>Preisbewertung</span></li>
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>5 Checkpunkte</span></li>
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>Typische Probleme</span></li>
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>Kaufempfehlung</span></li>
+        </ul>
+      </div>
 
-        <!-- Pricing Cards -->
-        <div class="grid md:grid-cols-3 gap-6 mb-10">
-            <!-- Basic Plan -->
-            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                <div class="mb-4">
-                    <h3 class="text-xl font-bold text-gray-900">Basic</h3>
-                    <p class="text-3xl font-bold text-blue-600 mt-2">4,99 €</p>
-                </div>
-                <ul class="space-y-3 mb-6">
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Preisbewertung</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Wichtige Checkpunkte</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Kaufempfehlung</span>
-                    </li>
-                </ul>
-                <label class="block">
-                    <input type="radio" name="plan" value="basic" class="mr-2" checked>
-                    <span class="text-gray-700">Basic wählen</span>
-                </label>
-            </div>
+      <div class="glass-card p-8 cursor-pointer plan-card plan-selected relative" data-plan="standard">
+        <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+          <span class="bg-gradient-to-r from-cyan-400 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-bold">BELIEBT</span>
+        </div>
+        <div class="text-center mb-6">
+          <h3 class="text-2xl font-bold mb-2">Standard</h3>
+          <div class="text-5xl font-bold neon-text">9,99€</div>
+          <p class="text-sm text-gray-400 mt-2">Detailanalyse</p>
+        </div>
+        <ul class="space-y-4 text-gray-300">
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>Alles aus Basic</span></li>
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>Marktvergleich</span></li>
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>Verhandlungstipps</span></li>
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>4 Alternativen</span></li>
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>3-Jahres-Prognose</span></li>
+        </ul>
+      </div>
 
-            <!-- Standard Plan -->
-            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow border-2 border-blue-500 relative">
-                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Beliebt</span>
-                </div>
-                <div class="mb-4">
-                    <h3 class="text-xl font-bold text-gray-900">Standard</h3>
-                    <p class="text-3xl font-bold text-blue-600 mt-2">9,99 €</p>
-                </div>
-                <ul class="space-y-3 mb-6">
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Alles aus Basic</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Marktvergleich</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Verhandlungstipps</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Alternative Modelle</span>
-                    </li>
-                </ul>
-                <label class="block">
-                    <input type="radio" name="plan" value="standard" class="mr-2">
-                    <span class="text-gray-700">Standard wählen</span>
-                </label>
-            </div>
+      <div class="glass-card p-8 cursor-pointer plan-card" data-plan="premium">
+        <div class="text-center mb-6">
+          <h3 class="text-2xl font-bold mb-2">Premium</h3>
+          <div class="text-5xl font-bold neon-text">24,99€</div>
+          <p class="text-sm text-gray-400 mt-2">Vollgutachten</p>
+        </div>
+        <ul class="space-y-4 text-gray-300">
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>Alles aus Standard</span></li>
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>30-Punkte-Check</span></li>
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>5-Jahres-Prognose</span></li>
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>Risikobewertung</span></li>
+          <li class="flex items-start"><span class="text-green-400 mr-3">✓</span><span>PDF-Export</span></li>
+        </ul>
+      </div>
+    </div>
 
-            <!-- Premium Plan -->
-            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                <div class="mb-4">
-                    <h3 class="text-xl font-bold text-gray-900">Premium</h3>
-                    <p class="text-3xl font-bold text-blue-600 mt-2">24,99 €</p>
-                </div>
-                <ul class="space-y-3 mb-6">
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Alles aus Standard</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Detailliertes PDF-Gutachten</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Wartungskostenprognose</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Wiederverkaufsprognose</span>
-                    </li>
-                    <li class="flex items-start">
-                        <svg class="w-5 h-5 text-green-500 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="text-gray-700">Bildanalyse (wenn vorhanden)</span>
-                    </li>
-                </ul>
-                <label class="block">
-                    <input type="radio" name="plan" value="premium" class="mr-2">
-                    <span class="text-gray-700">Premium wählen</span>
-                </label>
-            </div>
+    <div class="glass-card p-10">
+      <h3 class="text-3xl font-bold mb-8 text-center neon-text">Fahrzeugdaten eingeben</h3>
+      <form id="vehicleForm">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium mb-2 text-gray-300">Marke *</label>
+            <input type="text" name="brand" required class="glass-input" placeholder="z.B. Volkswagen" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2 text-gray-300">Modell *</label>
+            <input type="text" name="model" required class="glass-input" placeholder="z.B. Golf 7" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2 text-gray-300">Baujahr *</label>
+            <input type="number" name="year" required min="1900" max="2026" class="glass-input" placeholder="z.B. 2018" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2 text-gray-300">Kilometerstand *</label>
+            <input type="number" name="mileage" required min="0" class="glass-input" placeholder="z.B. 85000" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2 text-gray-300">Preis (€) *</label>
+            <input type="number" name="price" required min="0" class="glass-input" placeholder="z.B. 15000" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2 text-gray-300">Standort *</label>
+            <input type="text" name="city" required class="glass-input" placeholder="z.B. München" />
+          </div>
         </div>
 
-        <!-- Input Form -->
-        <div class="bg-white rounded-xl shadow-lg p-8">
-            <h3 class="text-2xl font-bold text-gray-900 mb-6">Fahrzeugdaten eingeben</h3>
-            
-            <form id="vehicleForm" class="space-y-6">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Marke *
-                        </label>
-                        <input type="text" name="brand" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="z.B. Volkswagen">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Modell *
-                        </label>
-                        <input type="text" name="model" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="z.B. Golf">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Baujahr *
-                        </label>
-                        <input type="number" name="year" required min="1900" max="2024"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="z.B. 2018">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Kilometerstand *
-                        </label>
-                        <input type="number" name="mileage" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="z.B. 85000">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Preis (€) *
-                        </label>
-                        <input type="number" name="price" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="z.B. 15000">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Standort *
-                        </label>
-                        <input type="text" name="city" required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="z.B. München">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            VIN (optional)
-                        </label>
-                        <input type="text" name="vin"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="Fahrzeug-Identifikationsnummer">
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Fahrzeugbild (optional)
-                        </label>
-                        <input type="file" name="image" accept="image/*"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <p class="text-xs text-gray-500 mt-1">Max. 10 MB, JPG/PNG</p>
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Zusätzliche Beschreibung (optional)
-                    </label>
-                    <textarea name="description" rows="3"
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                              placeholder="Weitere Details zum Fahrzeug..."></textarea>
-                </div>
-                
-                <button type="submit" id="analyzeBtn"
-                        class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
-                    Analyse starten
-                </button>
-            </form>
+        <div class="mt-6">
+          <label class="block text-sm font-medium mb-2 text-gray-300">VIN (optional)</label>
+          <input type="text" name="vin" class="glass-input" placeholder="17-stellige Fahrzeug-Identifikationsnummer" />
         </div>
 
-        <!-- Results Section (initially hidden) -->
-        <div id="resultsSection" class="hidden mt-8">
-            <div class="bg-white rounded-xl shadow-lg p-8">
-                <h3 class="text-2xl font-bold text-gray-900 mb-6">Analyseergebnis</h3>
-                <div id="analysisResult" class="prose max-w-none"></div>
-                <div id="pdfDownload" class="mt-6 hidden">
-                    <a href="#" id="pdfLink" class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        PDF-Gutachten herunterladen
-                    </a>
-                </div>
-            </div>
+        <div class="mt-6">
+          <label class="block text-sm font-medium mb-2 text-gray-300">Zusätzliche Beschreibung (optional)</label>
+          <textarea name="description" rows="3" class="glass-input" placeholder="z.B. Unfallfreiheit, Anzahl Vorbesitzer, Extras..."></textarea>
         </div>
 
-        <!-- Loading Spinner -->
-        <div id="loadingSpinner" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white rounded-lg p-8 flex flex-col items-center">
-                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
-                <p class="mt-4 text-gray-700">Analyse läuft...</p>
-            </div>
+        <div class="mt-6">
+          <label class="block text-sm font-medium mb-2 text-gray-300">Foto des Fahrzeugs (optional)</label>
+          <input type="file" id="photoInput" accept="image/*" class="glass-input" />
+          <p class="text-xs text-gray-500 mt-2">Max. 10 MB. Wird nur temporär verarbeitet.</p>
         </div>
-    </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8 mt-16">
-        <div class="container mx-auto px-4 text-center">
-            <p>&copy; 2024 Autoprüfer - KI-gestützte Fahrzeuganalyse</p>
-            <p class="text-gray-400 mt-2">Powered by OpenAI GPT-4</p>
+        <button type="submit" class="neon-button w-full mt-8" id="submitBtn">🚀 Analyse starten & bezahlen</button>
+        <div class="mt-4 p-4 bg-blue-500/10 rounded-lg text-center">
+          <p class="text-sm text-gray-400">🔔 Nach erfolgreicher Zahlung werden Sie automatisch zurückgeleitet. Das Ergebnis erscheint hier.</p>
         </div>
-    </footer>
+      </form>
+    </div>
 
-    <script src="script.js"></script>
+    <div id="resultSection" class="result-card mt-12 hidden">
+      <h3 class="text-2xl font-bold mb-4">Ergebnis</h3>
+      <div id="planBadge" class="mb-3 text-sm text-gray-400"></div>
+      <pre id="resultText" class="whitespace-pre-wrap text-gray-100"></pre>
+      <div id="pdfBlock" class="mt-6 hidden">
+        <a id="pdfLink" class="neon-button inline-block" href="#" target="_blank">📄 PDF herunterladen</a>
+      </div>
+      <div class="mt-4">
+        <button id="copyBtn" class="px-4 py-2 bg-white/10 rounded-lg">Text kopieren</button>
+      </div>
+    </div>
+  </main>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="text-center">
+      <div class="loading-spinner mx-auto mb-4"></div>
+      <p class="text-xl text-gray-300" id="loadingText">Weiterleitung zur Zahlung...</p>
+      <p class="text-sm text-gray-500 mt-2">Bitte warten...</p>
+    </div>
+  </div>
+
+  <script>
+    // Stripe publishable Key dynamisch laden
+    let stripe = null;
+    async function getStripe() {
+      if (stripe) return stripe;
+      const cfg = await fetch('/api/config').then(r => r.json());
+      stripe = Stripe(cfg.publishableKey);
+      return stripe;
+    }
+
+    // Hintergrund-Partikel
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    const particles = []; const particleCount = 80;
+    class Particle {
+      constructor() { this.x=Math.random()*canvas.width; this.y=Math.random()*canvas.height; this.size=Math.random()*3+1; this.speedX=Math.random()*2-1; this.speedY=Math.random()*2-1; this.opacity=Math.random()*0.5+0.2; }
+      update(){ this.x+=this.speedX; this.y+=this.speedY; if(this.x>canvas.width) this.x=0; if(this.x<0) this.x=canvas.width; if(this.y>canvas.height) this.y=0; if(this.y<0) this.y=canvas.height; }
+      draw(){ ctx.fillStyle=`rgba(0, 212, 255, ${this.opacity})`; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
+    }
+    for(let i=0;i<particleCount;i++){ particles.push(new Particle()); }
+    function animateParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{p.update(); p.draw();}); particles.forEach((p,i)=>{ for(let j=i+1;j<particles.length;j++){ const dx=particles[j].x-p.x; const dy=particles[j].y-p.y; const d=Math.sqrt(dx*dx+dy*dy); if(d<100){ ctx.strokeStyle=`rgba(0,212,255, ${0.1*(1-d/100)})`; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(particles[j].x,particles[j].y); ctx.stroke(); }}}); requestAnimationFrame(animateParticles);} animateParticles(); window.addEventListener('resize', ()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight; });
+
+    // Plan Auswahl
+    let selectedPlan = 'standard';
+    document.querySelectorAll('.plan-card').forEach(card => {
+      card.addEventListener('click', function(){
+        document.querySelectorAll('.plan-card').forEach(c=>c.classList.remove('plan-selected'));
+        this.classList.add('plan-selected'); selectedPlan = this.dataset.plan;
+      });
+    });
+
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    function showLoading(msg){ document.getElementById('loadingText').textContent = msg || 'Bitte warten...'; loadingOverlay.style.display='flex'; }
+    function hideLoading(){ loadingOverlay.style.display='none'; }
+
+    // Datei-Upload (optional)
+    async function uploadPhotoIfAny(){
+      const fileInput = document.getElementById('photoInput');
+      if (!fileInput.files || !fileInput.files[0]) return null;
+      const form = new FormData();
+      form.append('photo', fileInput.files[0]);
+      const res = await fetch('/api/upload', { method: 'POST', body: form });
+      if (!res.ok) throw new Error('Foto-Upload fehlgeschlagen');
+      return res.json();
+    }
+
+    // Checkout Flow
+    document.getElementById('vehicleForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      showLoading('Weiterleitung zur Zahlung...');
+
+      try {
+        const formData = new FormData(e.target);
+        const vehicleData = {
+          brand: formData.get('brand'), model: formData.get('model'), year: parseInt(formData.get('year')), mileage: parseInt(formData.get('mileage')), price: parseInt(formData.get('price')), city: formData.get('city'), vin: formData.get('vin') || '', description: formData.get('description') || ''
+        };
+
+        let uploadId = null;
+        try { const up = await uploadPhotoIfAny(); if (up && up.uploadId) uploadId = up.uploadId; } catch(err) { console.warn('Upload übersprungen:', err.message); }
+
+        const resp = await fetch('/api/create-checkout', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: selectedPlan, vehicleData, uploadId })
+        });
+        if (!resp.ok) { const err = await resp.json(); throw new Error(err.details || err.error || 'Fehler beim Checkout'); }
+        const data = await resp.json();
+
+        const stripe = await getStripe();
+        const { error } = await stripe.redirectToCheckout({ sessionId: data.sessionId });
+        if (error) throw error;
+      } catch (err) {
+        alert('Fehler: ' + (err.message || 'Unbekannter Fehler'));
+        hideLoading();
+        submitBtn.disabled = false;
+      }
+    });
+
+    // Ergebnis nach erfolgreicher Zahlung automatisch laden
+    async function checkSuccess(){
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('canceled') === 'true') {
+        alert('Zahlung abgebrochen. Sie können es jederzeit erneut versuchen.');
+        window.history.replaceState({}, document.title, '/');
+        return;
+      }
+      const sessionId = urlParams.get('session_id');
+      if (urlParams.get('success') === 'true' && sessionId) {
+        showLoading('Analyse läuft...');
+        await pollResult(sessionId);
+        window.history.replaceState({}, document.title, '/');
+      }
+    }
+
+    async function pollResult(sessionId){
+      const start = Date.now();
+      while (Date.now() - start < 180000) { // bis 3 Minuten
+        const r = await fetch('/api/result?session_id=' + encodeURIComponent(sessionId));
+        if (r.ok) {
+          const data = await r.json();
+          if (data.status === 'ready') { hideLoading(); renderResult(data); return; }
+        }
+        await new Promise(res => setTimeout(res, 2000));
+      }
+      hideLoading();
+      alert('Die Analyse dauert länger als erwartet. Bitte laden Sie die Seite später erneut und halten Sie die Session-ID bereit.');
+    }
+
+    function renderResult(data){
+      const sec = document.getElementById('resultSection');
+      const txt = document.getElementById('resultText');
+      const badge = document.getElementById('planBadge');
+      const pdfBlock = document.getElementById('pdfBlock');
+      const pdfLink = document.getElementById('pdfLink');
+
+      badge.textContent = 'Plan: ' + (data.plan || '').toUpperCase();
+      txt.textContent = data.text || '';
+      if (data.pdfUrl) { pdfBlock.classList.remove('hidden'); pdfLink.href = data.pdfUrl; }
+      else { pdfBlock.classList.add('hidden'); }
+      sec.classList.remove('hidden');
+    }
+
+    document.getElementById('copyBtn').addEventListener('click', async () => {
+      const text = document.getElementById('resultText').textContent;
+      try { await navigator.clipboard.writeText(text); alert('Kopiert.'); } catch { alert('Kopieren fehlgeschlagen.'); }
+    });
+
+    checkSuccess();
+  </script>
 </body>
 </html>

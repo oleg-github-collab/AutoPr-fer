@@ -1,67 +1,32 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { analyzeVehicle } = require('./analyze');
+import express from 'express';
+import Stripe from 'stripe';
+import { analyzeFromSession } from './analyze.js';
 
-async function createCheckoutSession(plan, vehicleData) {
-  const prices = {
-    basic: process.env.STRIPE_PRICE_BASIC,
-    standard: process.env.STRIPE_PRICE_STANDARD,
-    premium: process.env.STRIPE_PRICE_PREMIUM
-  };
+const router = express.Router();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2024-06-20' });
 
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card'],
-    line_items: [{
-      price: prices[plan],
-      quantity: 1,
-    }],
-    mode: 'payment',
-    success_url: `${process.env.SERVER_URL}/success.html?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.SERVER_URL}/`,
-    metadata: {
-      plan: plan,
-      vehicleData: JSON.stringify(vehicleData)
-    },
-    locale: 'de'
-  });
-
-  return session;
-}
-
-async function handleStripeWebhook(req, res) {
+router.post('/', async (req, res) => {
   const sig = req.headers['stripe-signature'];
-  let event;
 
+  let event;
   try {
-    event = stripe.webhooks.constructEvent(
-      req.rawBody,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
+    console.error(`⚠️  Webhook-Verifizierung fehlgeschlagen: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    
-    try {
-      const vehicleData = JSON.parse(session.metadata.vehicleData);
-      const plan = session.metadata.plan;
-      
-      // Trigger analysis
-      const result = await analyzeVehicle(vehicleData, plan, null);
-      
-      // Store result temporarily (in production, use Redis or similar)
-      global.analysisResults = global.analysisResults || {};
-      global.analysisResults[session.id] = result;
-      
-    } catch (error) {
-      console.error('Error processing successful payment:', error);
+  try {
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      // Analyse asynchron starten
+      analyzeFromSession(session).catch((e) => console.error('Analyse-Fehler:', e));
     }
+    res.json({ received: true });
+  } catch (e) {
+    console.error('Webhook-Handler-Fehler:', e);
+    res.status(500).json({ error: 'Interner Fehler' });
   }
+});
 
-  res.json({ received: true });
-}
-
-module.exports = { createCheckoutSession, handleStripeWebhook };
+export default router;
